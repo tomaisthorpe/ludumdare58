@@ -9,10 +9,13 @@ import {
 } from "@tedengine/ted";
 import { vec3 } from "gl-matrix";
 import GameState from "./game";
+import config from "./config";
 
 export class PlayerMovementComponent extends TComponent {}
 
 export class PlayerMovementSystem extends TSystem {
+  public winchSpeed = config.equipment.winchSpeeds[0];
+
   private query: TEntityQuery;
   constructor(world: TWorld, private gameState: GameState) {
     super();
@@ -36,8 +39,8 @@ export class PlayerMovementSystem extends TSystem {
       const force = vec3.fromValues(0, 0, 0);
 
       if (this.gameState.state === "fishing") {
-        force[0] += input.moveDirection[0] * 150;
-        force[1] += input.moveDirection[1] * 150;
+        force[0] += input.moveDirection[0] * this.winchSpeed;
+        force[1] += input.moveDirection[1] * this.winchSpeed;
       }
 
       world.applyCentralForce(entity, force);

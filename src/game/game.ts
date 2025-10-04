@@ -21,6 +21,8 @@ import { Upgrade } from "../UpdateModal.tsx";
 
 export default class GameState extends TGameState {
   public lootSystem!: LootSystem;
+  public playerMovementSystem!: PlayerMovementSystem;
+
   public day = 1;
   public money = 100;
 
@@ -54,7 +56,8 @@ export default class GameState extends TGameState {
       new TPlayerInputSystem(this.world, this.engine.inputManager)
     );
 
-    this.world.addSystem(new PlayerMovementSystem(this.world, this));
+    this.playerMovementSystem = new PlayerMovementSystem(this.world, this);
+    this.world.addSystem(this.playerMovementSystem);
     this.world.addSystem(new RopeLinksSystem(this.world));
 
     createCamera(this.world, this.engine.inputManager);
@@ -92,6 +95,8 @@ export default class GameState extends TGameState {
       switch (upgrade.type) {
         case "winchSpeed":
           this.equipment.winchSpeed = upgrade.level;
+          this.playerMovementSystem.winchSpeed =
+            config.equipment.winchSpeeds[upgrade.level - 1];
           break;
         case "ropeLength":
           this.equipment.ropeLength = upgrade.level;

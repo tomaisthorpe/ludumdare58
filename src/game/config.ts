@@ -11,7 +11,7 @@ const config = {
   },
 
   equipment: {
-    winchSpeeds: [100, 200, 300],
+    winchSpeeds: [150, 250, 450],
     ropeLengths: [100, 200, 300],
     maxWinchSpeed: 3,
     maxRopeLength: 3,
