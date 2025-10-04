@@ -27,7 +27,7 @@ export default class GameState extends TGameState {
   public money = 100;
 
   public timeLeft = config.dayLength;
-  public state: "start" | "fishing" | "upgrade" = "start";
+  public state: "start" | "fishing" | "upgrade" | "win" = "start";
 
   public equipment = {
     winchSpeed: 1,
@@ -71,9 +71,17 @@ export default class GameState extends TGameState {
     createRopeLinks(this.world);
     createWater(this.world);
     createBoat(this.world);
-    this.lootSystem = createLoot(this.world, (value: number) => {
-      this.money += value;
-    });
+    this.lootSystem = createLoot(
+      this.world,
+      (type: LootType, value: number) => {
+        if (type === "treasure") {
+          // yay, win the game
+          this.win();
+        }
+
+        this.money += value;
+      }
+    );
 
     this.lootSystem.spawnLoot();
 
@@ -110,6 +118,11 @@ export default class GameState extends TGameState {
     this.events.addListener("START_NEXT_DAY", () => {
       this.startNextDay();
     });
+  }
+
+  private win() {
+    this.state = "win";
+    this.resetMagnet();
   }
 
   private startNextDay() {

@@ -21,7 +21,7 @@ import { overridePalette } from "./utils";
 
 export function createLoot(
   world: TWorld,
-  onCollect: (value: number) => void
+  onCollect: (type: LootType, value: number) => void
 ): LootSystem {
   const lootSystem = new LootSystem(world, onCollect);
   world.addSystem(lootSystem);
@@ -29,7 +29,7 @@ export function createLoot(
   return lootSystem;
 }
 
-export function spawnLoot(world: TWorld, x: number, y: number) {
+export function spawnLoot(world: TWorld, x: number, y: number, type: LootType) {
   const boxMesh = createBoxMesh(15, 15, 15);
 
   boxMesh.material.palette = overridePalette(
@@ -49,13 +49,17 @@ export function spawnLoot(world: TWorld, x: number, y: number) {
       { mass: 0.1, isTrigger: false, linearDamping: 0.95, angularDamping: 0.9 },
       createBoxCollider(15, 15, 15)
     ),
-    new LootComponent(),
+    new LootComponent(type, config.lootValues[type]),
   ]);
 }
 
+export type LootType = "low" | "treasure";
 export class LootComponent extends TComponent {
   public magnetised: boolean = false;
-  public value: number = 10;
+
+  constructor(public type: LootType, public value: number) {
+    super();
+  }
 }
 
 export class LootSystem extends TSystem {
@@ -66,7 +70,7 @@ export class LootSystem extends TSystem {
 
   constructor(
     private world: TWorld,
-    private onCollect: (value: number) => void
+    private onCollect: (type: LootType, value: number) => void
   ) {
     super();
     this.query = this.world.createQuery([LootComponent]);
@@ -80,9 +84,11 @@ export class LootSystem extends TSystem {
       this.world.removeEntity(entity);
     }
 
-    spawnLoot(this.world, 0, -400);
-    spawnLoot(this.world, 100, -400);
-    spawnLoot(this.world, -100, -400);
+    spawnLoot(this.world, 0, -400, "low");
+    spawnLoot(this.world, 100, -400, "low");
+    spawnLoot(this.world, -100, -400, "low");
+
+    spawnLoot(this.world, -100, -600, "treasure");
   }
 
   public async update(_: TEngine, world: TWorld) {
@@ -150,7 +156,7 @@ export class LootSystem extends TSystem {
         lootTransform.transform.translation[1] >
           config.topLeftCorner.y - config.waterLevel - 50
       ) {
-        this.onCollect(loot.value);
+        this.onCollect(loot.type, loot.value);
         world.removeEntity(entity);
       } else {
         world.applyCentralForce(entity, totalForce);

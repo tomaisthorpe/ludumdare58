@@ -6,6 +6,7 @@ import Stats from "./Stats";
 import MagnetMonitor from "./MagnetMonitor";
 import { UpdateModal } from "./UpdateModal";
 import { StartNextDay } from "./StartNextDay";
+import { Victory } from "./Victory";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <MagnetMonitor />
           <UpdateModal />
           <StartNextDay />
+          <Victory />
         </TGame>
       </div>
     </>

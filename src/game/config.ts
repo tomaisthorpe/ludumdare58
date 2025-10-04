@@ -12,17 +12,21 @@ const config = {
 
   equipment: {
     winchSpeeds: [150, 250, 450],
-    ropeLengths: [100, 200, 300],
+    ropeLengths: [800, 200, 600],
     maxWinchSpeed: 3,
     maxRopeLength: 3,
   },
 
-  dayLength: 3, // in seconds
+  dayLength: 10, // in seconds
 
   // Top left corner of the screen
   topLeftCorner: {
     x: -400,
     y: 300,
+  },
+  lootValues: {
+    low: 10,
+    treasure: Infinity,
   },
 };
 
