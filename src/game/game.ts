@@ -31,6 +31,7 @@ import {
 import { vec3 } from "gl-matrix";
 import { createWater } from "./water";
 import config from "./config";
+import { createBoat } from "./boat";
 
 export default class GameState extends TGameState {
   public async onCreate() {
@@ -139,6 +140,7 @@ export default class GameState extends TGameState {
     ]);
 
     createWater(this.world);
+    createBoat(this.world);
   }
 }
 

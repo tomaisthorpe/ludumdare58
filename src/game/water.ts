@@ -28,7 +28,7 @@ export function createWater(world: TWorld) {
     TTransformBundle.with(
       new TTransformComponent(
         new TTransform(
-          vec3.fromValues(0, y, 0),
+          vec3.fromValues(0, y, -100),
           rotation,
           vec3.fromValues(1, 1, 1)
         )
