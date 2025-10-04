@@ -45,7 +45,7 @@ export default class GameState extends TGameState {
   public beforeWorldCreate() {
     this.world!.config.mode = "2d";
     // this.world!.config.gravity = vec3.fromValues(0, -98.1, 0);
-    this.world!.physicsDebug = true;
+    // this.world!.physicsDebug = true;
   }
 
   public onReady() {
