@@ -13,7 +13,7 @@ import { createWater } from "./water";
 import { createBoat } from "./boat";
 import { createCamera } from "./camera";
 import { createMagnet } from "./magnet";
-import { createLoot, LootSystem } from "./loot.ts";
+import { createLoot, LootSystem, LootType } from "./loot.ts";
 import { RopeLinksSystem, createRopeLinks } from "./rope";
 import { vec3, vec4, mat4 } from "gl-matrix";
 import config from "./config";
