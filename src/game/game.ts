@@ -73,8 +73,9 @@ export default class GameState extends TGameState {
     createBoat(this.world);
     this.lootSystem = createLoot(this.world, (value: number) => {
       this.money += value;
-      this.refreshGameContext();
     });
+
+    this.lootSystem.spawnLoot();
 
     this.refreshGameContext();
     this.onSpace = this.onSpace.bind(this);
@@ -113,6 +114,7 @@ export default class GameState extends TGameState {
 
   private startNextDay() {
     this.state = "start";
+    this.lootSystem.spawnLoot();
   }
 
   private onSpace() {

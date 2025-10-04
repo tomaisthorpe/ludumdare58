@@ -26,10 +26,6 @@ export function createLoot(
   const lootSystem = new LootSystem(world, onCollect);
   world.addSystem(lootSystem);
 
-  spawnLoot(world, 0, -400);
-  spawnLoot(world, 100, -400);
-  spawnLoot(world, -100, -400);
-
   return lootSystem;
 }
 
@@ -75,6 +71,18 @@ export class LootSystem extends TSystem {
     super();
     this.query = this.world.createQuery([LootComponent]);
     this.playerQuery = this.world.createQuery([PlayerMovementComponent]);
+  }
+
+  public spawnLoot() {
+    // Remove existing loot
+    const existingLoot = this.world.createQuery([LootComponent]);
+    for (const entity of existingLoot.execute()) {
+      this.world.removeEntity(entity);
+    }
+
+    spawnLoot(this.world, 0, -400);
+    spawnLoot(this.world, 100, -400);
+    spawnLoot(this.world, -100, -400);
   }
 
   public async update(_: TEngine, world: TWorld) {
