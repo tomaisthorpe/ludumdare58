@@ -10,6 +10,8 @@ const config = {
     magnet: [0.337, 0.522, 0.345, 1],
   },
 
+  dayLength: 3, // in seconds
+
   // Top left corner of the screen
   topLeftCorner: {
     x: -400,

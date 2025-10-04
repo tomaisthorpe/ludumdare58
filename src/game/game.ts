@@ -6,6 +6,7 @@ import {
   TWorld,
   TTransformComponent,
   TFixedAxisCameraTargetComponent,
+  TKeyDownEvent,
 } from "@tedengine/ted";
 import { PlayerMovementSystem } from "./player-movement";
 import { createWater } from "./water";
@@ -15,11 +16,17 @@ import { createMagnet } from "./magnet";
 import { createLoot, LootSystem } from "./loot.ts";
 import { RopeLinksSystem, createRopeLinks } from "./rope";
 import { vec3, vec4, mat4 } from "gl-matrix";
+import config from "./config";
 
 export default class GameState extends TGameState {
   public lootSystem!: LootSystem;
   public day = 1;
   public money = 0;
+
+  public timeLeft = config.dayLength;
+  public state: "start" | "fishing" | "upgrade" = "start";
+
+  public dropMagnet!: () => void;
 
   public async onCreate() {
     this.onReady();
@@ -27,8 +34,8 @@ export default class GameState extends TGameState {
 
   public beforeWorldCreate() {
     this.world!.config.mode = "2d";
-    // this.world!.config.gravity = vec3.fromValues(0, 0, 0);
-    // this.world!.physicsDebug = true;
+    // this.world!.config.gravity = vec3.fromValues(0, -98.1, 0);
+    this.world!.physicsDebug = true;
   }
 
   public onReady() {
@@ -43,7 +50,9 @@ export default class GameState extends TGameState {
     this.world.addSystem(new RopeLinksSystem(this.world));
 
     createCamera(this.world, this.engine.inputManager);
-    createMagnet(this.world);
+    const { dropMagnet } = createMagnet(this.world);
+    this.dropMagnet = dropMagnet.bind(this);
+
     createRopeLinks(this.world);
     createWater(this.world);
     createBoat(this.world);
@@ -53,6 +62,21 @@ export default class GameState extends TGameState {
     });
 
     this.refreshGameContext();
+    this.onSpace = this.onSpace.bind(this);
+
+    this.events.addListener<TKeyDownEvent>("keydown", (event) => {
+      if (event.subType === "Space") {
+        this.onSpace();
+      }
+    });
+  }
+
+  private onSpace() {
+    if (this.state === "start") {
+      console.log("dropping magnet");
+      this.dropMagnet();
+      this.state = "fishing";
+    }
   }
 
   private refreshGameContext() {
@@ -64,8 +88,23 @@ export default class GameState extends TGameState {
     });
   }
 
-  public onUpdate() {
+  private onDayEnd() {
+    this.timeLeft = config.dayLength;
+    this.day++;
+
+    this.state = "upgrade";
+    this.world!.pause();
+  }
+
+  public onUpdate(_: TEngine, delta: number) {
     this.refreshGameContext();
+
+    if (this.state !== "fishing") return;
+
+    this.timeLeft -= delta;
+    if (this.timeLeft <= 0) {
+      this.onDayEnd();
+    }
   }
 }
 
