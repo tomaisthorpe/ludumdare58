@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useGameContext } from "@tedengine/ted";
+import { useGameContext, useUIContext } from "@tedengine/ted";
 
 const Container = styled.div`
   position: absolute;
@@ -13,7 +13,17 @@ const Container = styled.div`
 
 export function StartNextDay() {
   const { state } = useGameContext();
+  const { scaling } = useUIContext();
   if (state !== "start") return null;
 
-  return <Container>Press space to start the day.</Container>;
+  return (
+    <Container
+      style={{
+        transform: `scale(${scaling})`,
+        transformOrigin: "bottom center",
+      }}
+    >
+      Press space to start the day.
+    </Container>
+  );
 }

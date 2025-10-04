@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { useGameContext } from "@tedengine/ted";
+import { useGameContext, useUIContext } from "@tedengine/ted";
 
 const Container = styled.div`
   position: absolute;
@@ -18,17 +18,30 @@ const Day = styled.div`
 `;
 
 const Money = styled.div`
-  padding-right: 1rem;
+  padding-right: 4rem;
 `;
 
 export default function Stats() {
   const { money, day } = useGameContext();
+  const { scaling } = useUIContext();
+
   if (money === undefined) return null;
 
   return (
     <Container>
-      <Day>Day {day!.toString()}</Day>
-      <Money>${money!.toString()}</Money>
+      <Day
+        style={{
+          transform: `scale(${scaling})`,
+          transformOrigin: "top left",
+        }}
+      >
+        Day {day!.toString()}
+      </Day>
+      <Money
+        style={{ transform: `scale(${scaling})`, transformOrigin: "top right" }}
+      >
+        ${money!.toString()}
+      </Money>
     </Container>
   );
 }

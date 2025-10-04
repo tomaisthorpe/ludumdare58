@@ -1,4 +1,4 @@
-import { useEventQueue, useGameContext } from "@tedengine/ted";
+import { useEventQueue, useGameContext, useUIContext } from "@tedengine/ted";
 import styled from "styled-components";
 import config from "./game/config";
 
@@ -83,6 +83,7 @@ export type Upgrade = {
 export function UpdateModal() {
   const events = useEventQueue();
   const { state, equipment } = useGameContext();
+  const { scaling } = useUIContext();
 
   if (state !== "upgrade") return null;
   if (equipment === undefined) return null;
@@ -124,7 +125,9 @@ export function UpdateModal() {
   };
 
   return (
-    <Container>
+    <Container
+      style={{ transform: `scale(${scaling})`, transformOrigin: "center" }}
+    >
       <Modal>
         <h2>Upgrade</h2>
         <p>

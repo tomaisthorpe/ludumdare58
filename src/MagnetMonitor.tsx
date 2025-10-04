@@ -2,6 +2,12 @@ import styled from "styled-components";
 import { useGameContext } from "@tedengine/ted";
 import { useUIContext } from "@tedengine/ted";
 
+const Container = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
+
 const Bubble = styled.div`
   position: absolute;
   color: white;
@@ -25,18 +31,22 @@ export default function MagnetMonitor() {
   if (Math.abs(pos.x) === Infinity || Math.abs(pos.y) === Infinity) return null;
 
   const screenPos = {
-    x: (pos.x + 10) * scaling,
-    y: (pos.y - 20) * scaling,
+    x: pos.x + 10,
+    y: pos.y - 20,
   };
 
   const value = magnetValue || 0;
 
   return (
-    <Bubble
-      style={{ left: screenPos.x, top: screenPos.y }}
-      className={typeof value === "number" && value > 0 ? "visible" : ""}
+    <Container
+      style={{ transform: `scale(${scaling})`, transformOrigin: "top left" }}
     >
-      ${value.toString()}
-    </Bubble>
+      <Bubble
+        style={{ left: screenPos.x, top: screenPos.y }}
+        className={typeof value === "number" && value > 0 ? "visible" : ""}
+      >
+        ${value.toString()}
+      </Bubble>
+    </Container>
   );
 }

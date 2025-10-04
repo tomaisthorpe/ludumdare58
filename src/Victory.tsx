@@ -1,4 +1,4 @@
-import { useGameContext } from "@tedengine/ted";
+import { useGameContext, useUIContext } from "@tedengine/ted";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -17,10 +17,13 @@ const Container = styled.div`
 
 export function Victory() {
   const { state } = useGameContext();
+  const { scaling } = useUIContext();
   if (state !== "win") return null;
 
   return (
-    <Container>
+    <Container
+      style={{ transform: `scale(${scaling})`, transformOrigin: "center" }}
+    >
       <h1>You win!</h1>
       <p>You have collected the treasure.</p>
     </Container>
