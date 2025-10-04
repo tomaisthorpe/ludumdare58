@@ -10,6 +10,11 @@ const config = {
     magnet: [0.337, 0.522, 0.345, 1],
   },
 
+  equipment: {
+    maxWinchSpeed: 3,
+    maxRopeLength: 3,
+  },
+
   dayLength: 3, // in seconds
 
   // Top left corner of the screen

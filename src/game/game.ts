@@ -17,14 +17,20 @@ import { createLoot, LootSystem } from "./loot.ts";
 import { RopeLinksSystem, createRopeLinks } from "./rope";
 import { vec3, vec4, mat4 } from "gl-matrix";
 import config from "./config";
+import { Upgrade } from "../UpdateModal.tsx";
 
 export default class GameState extends TGameState {
   public lootSystem!: LootSystem;
   public day = 1;
-  public money = 0;
+  public money = 100;
 
   public timeLeft = config.dayLength;
   public state: "start" | "fishing" | "upgrade" = "start";
+
+  public equipment = {
+    winchSpeed: 1,
+    ropeLength: 1,
+  };
 
   public dropMagnet!: () => void;
   public resetMagnet!: () => void;
@@ -71,6 +77,30 @@ export default class GameState extends TGameState {
         this.onSpace();
       }
     });
+
+    this.events.addListener("UPGRADE_EQUIPMENT", (event) => {
+      // Check cost first
+      if (event.payload === undefined) return;
+      const upgrade = event.payload as Upgrade;
+      if (upgrade.cost > this.money) return;
+      this.money -= upgrade.cost;
+
+      switch (upgrade.type) {
+        case "winchSpeed":
+          this.equipment.winchSpeed = upgrade.level;
+          break;
+        case "ropeLength":
+          this.equipment.ropeLength = upgrade.level;
+      }
+    });
+
+    this.events.addListener("START_NEXT_DAY", () => {
+      this.startNextDay();
+    });
+  }
+
+  private startNextDay() {
+    this.state = "start";
   }
 
   private onSpace() {
@@ -87,6 +117,8 @@ export default class GameState extends TGameState {
       day: this.day,
       magnetScreenPos: getMagnetScreenPos(this.world!, this.engine),
       magnetValue: this.lootSystem.currentValue,
+      state: this.state,
+      equipment: this.equipment,
     });
   }
 
