@@ -6,10 +6,8 @@ import game from "./game/game?worker";
 function App() {
   return (
     <>
-      <div style={{ width: "100%", height: "100%" }}>
+      <div>
         <TGame
-          width="100%"
-          height="100%"
           config={{
             renderWidth: 800,
             renderHeight: 600,
@@ -18,7 +16,7 @@ function App() {
             showAudioToggle: false,
           }}
           game={new game()}
-          />
+        />
       </div>
     </>
   );
