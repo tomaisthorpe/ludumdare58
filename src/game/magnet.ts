@@ -131,9 +131,9 @@ export class MagnetSystem extends TSystem {
 
       // If magnet is set as a trigger and is underwater, then it should be removed
       if (transform.transform.translation[1] < underwaterStartY) {
-        console.log("Magnet is underwater, removing it");
         const rb = world.getComponent(entity, TRigidBodyComponent);
         if (!rb || !rb.physicsOptions.isTrigger) continue;
+
         const opt = rb.physicsOptions;
         opt.isTrigger = false;
         rb.physicsOptions = opt;
