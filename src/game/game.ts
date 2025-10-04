@@ -10,6 +10,7 @@ import { createWater } from "./water";
 import { createBoat } from "./boat";
 import { createCamera } from "./camera";
 import { createMagnet } from "./magnet";
+import { createLoot } from "./loot";
 
 export default class GameState extends TGameState {
   public async onCreate() {
@@ -18,7 +19,7 @@ export default class GameState extends TGameState {
 
   public beforeWorldCreate() {
     this.world!.config.mode = "2d";
-    this.world!.config.gravity = vec3.fromValues(0, 0, 0);
+    // this.world!.config.gravity = vec3.fromValues(0, 0, 0);
     this.world!.physicsDebug = true;
   }
 
@@ -36,6 +37,7 @@ export default class GameState extends TGameState {
     createMagnet(this.world);
     createWater(this.world);
     createBoat(this.world);
+    createLoot(this.world);
   }
 }
 

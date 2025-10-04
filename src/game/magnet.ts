@@ -35,7 +35,11 @@ export function createMagnet(world: TWorld) {
     new TMaterialComponent(boxMesh.material),
     new TVisibilityComponent(),
     new TRigidBodyComponent(
-      { mass: 1, linearDamping: 0.9, angularDamping: 0.3 },
+      {
+        mass: 1,
+        linearDamping: 0.9,
+        angularDamping: 0.3,
+      },
       createBoxCollider(10, 10, 10)
     ),
     new TPlayerInputComponent(),
