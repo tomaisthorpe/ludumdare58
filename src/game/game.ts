@@ -16,12 +16,17 @@ import {
   TProjectionType,
   TCameraComponent,
   TActiveCameraComponent,
+  TOrbitCameraComponent,
+  TMouseInputComponent,
+  TMouseInputSystem,
+  TOrbitCameraSystem,
 } from "@tedengine/ted";
 import {
   PlayerMovementComponent,
   PlayerMovementSystem,
 } from "./player-movement";
 import { vec3 } from "gl-matrix";
+import { createWater } from "./water";
 
 export default class GameState extends TGameState {
   public async onCreate() {
@@ -35,6 +40,13 @@ export default class GameState extends TGameState {
 
   public onReady() {
     if (!this.engine || !this.world) return;
+    this.world.addSystem(
+      new TOrbitCameraSystem(this.world, this.engine.inputManager)
+    );
+
+    this.world.addSystem(
+      new TMouseInputSystem(this.world, this.engine.inputManager)
+    );
 
     // Setup ortho camera
     const ortho = this.world.createEntity();
@@ -52,6 +64,24 @@ export default class GameState extends TGameState {
     ]);
     this.world.cameraSystem.setActiveCamera(ortho);
 
+    // Orbit camera for debug
+    const orbit = this.world.createEntity();
+    this.world.addComponents(orbit, [
+      new TCameraComponent({ type: TProjectionType.Perspective, fov: 45 }),
+      TTransformBundle.with(
+        new TTransformComponent(new TTransform(vec3.fromValues(0, 0, 0)))
+      ),
+      new TActiveCameraComponent(),
+      new TOrbitCameraComponent({
+        distance: 20,
+        speed: 0.5,
+        enableDrag: true,
+      }),
+      new TMouseInputComponent(),
+    ]);
+
+    // this.world.cameraSystem.setActiveCamera(orbit);
+
     setPlayerInputMapping(this.engine.inputManager);
     this.world.addSystem(
       new TPlayerInputSystem(this.world, this.engine.inputManager)
@@ -60,8 +90,8 @@ export default class GameState extends TGameState {
     this.world.addSystem(new PlayerMovementSystem(this.world));
 
     const boxMesh = createBoxMesh(10, 10, 10);
-    const box = this.world.createEntity();
-    this.world.addComponents(box, [
+    const magnet = this.world.createEntity();
+    this.world.addComponents(magnet, [
       TTransformBundle.with(
         new TTransformComponent(new TTransform(vec3.fromValues(0, 5, 0)))
       ),
@@ -75,6 +105,8 @@ export default class GameState extends TGameState {
       new TPlayerInputComponent(),
       new PlayerMovementComponent(),
     ]);
+
+    createWater(this.world);
   }
 }
 
