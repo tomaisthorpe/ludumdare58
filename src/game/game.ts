@@ -20,6 +20,9 @@ import {
   TMouseInputComponent,
   TMouseInputSystem,
   TOrbitCameraSystem,
+  TFixedAxisCameraSystem,
+  TFixedAxisCameraTargetComponent,
+  TFixedAxisCameraComponent,
 } from "@tedengine/ted";
 import {
   PlayerMovementComponent,
@@ -27,6 +30,7 @@ import {
 } from "./player-movement";
 import { vec3 } from "gl-matrix";
 import { createWater } from "./water";
+import config from "./config";
 
 export default class GameState extends TGameState {
   public async onCreate() {
@@ -48,6 +52,24 @@ export default class GameState extends TGameState {
       new TMouseInputSystem(this.world, this.engine.inputManager)
     );
 
+    this.world.addSystem(new TFixedAxisCameraSystem(this.world));
+
+    const fixedComponent = new TFixedAxisCameraComponent({
+      distance: 10,
+      axis: "z",
+      leadFactor: 50,
+      maxLead: 0.9,
+      lerpFactor: 0.9,
+      bounds: {
+        min: vec3.fromValues(
+          0,
+          config.gameHeight - config.waterLevel - config.waterDepth,
+          0
+        ),
+        max: vec3.fromValues(0, 0, 100),
+      },
+    });
+
     // Setup ortho camera
     const ortho = this.world.createEntity();
     const orthoComponent = new TCameraComponent({
@@ -61,6 +83,7 @@ export default class GameState extends TGameState {
         new TTransformComponent(new TTransform(vec3.fromValues(0, 0, 50)))
       ),
       TActiveCameraComponent,
+      fixedComponent,
     ]);
     this.world.cameraSystem.setActiveCamera(ortho);
 
@@ -93,7 +116,15 @@ export default class GameState extends TGameState {
     const magnet = this.world.createEntity();
     this.world.addComponents(magnet, [
       TTransformBundle.with(
-        new TTransformComponent(new TTransform(vec3.fromValues(0, 5, 0)))
+        new TTransformComponent(
+          new TTransform(
+            vec3.fromValues(
+              config.topLeftCorner.x + 300,
+              config.topLeftCorner.y - config.waterLevel - 20,
+              0
+            )
+          )
+        )
       ),
       new TMeshComponent({ source: "inline", geometry: boxMesh.geometry }),
       new TMaterialComponent(boxMesh.material),
@@ -104,6 +135,7 @@ export default class GameState extends TGameState {
       ),
       new TPlayerInputComponent(),
       new PlayerMovementComponent(),
+      new TFixedAxisCameraTargetComponent(),
     ]);
 
     createWater(this.world);

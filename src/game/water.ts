@@ -20,7 +20,7 @@ export function createWater(world: TWorld) {
   };
 
   // Position so the top edge is waterLevel down from the top of the screen
-  const y = config.gameHeight / 2 - config.waterLevel - config.waterDepth / 2;
+  const y = config.topLeftCorner.y - config.waterLevel - config.waterDepth / 2;
 
   // Plane is created on the xz plane, so we need to rotate it to the xy plane
   const rotation = quat.fromEuler(quat.create(), 90, 0, 0);
