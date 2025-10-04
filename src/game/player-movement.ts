@@ -34,8 +34,8 @@ export class PlayerMovementSystem extends TSystem {
 
       const force = vec3.fromValues(0, 0, 0);
 
-      force[0] += input.moveDirection[0] * 100;
-      force[1] += input.moveDirection[1] * 100;
+      force[0] += input.moveDirection[0] * 150;
+      force[1] += input.moveDirection[1] * 150;
 
       world.applyCentralForce(entity, force);
     }

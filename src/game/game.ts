@@ -41,6 +41,7 @@ export default class GameState extends TGameState {
   public beforeWorldCreate() {
     this.world!.config.mode = "2d";
     this.world!.config.gravity = vec3.fromValues(0, 0, 0);
+    this.world!.physicsDebug = true;
   }
 
   public onReady() {
@@ -131,8 +132,8 @@ export default class GameState extends TGameState {
       new TMaterialComponent(boxMesh.material),
       new TVisibilityComponent(),
       new TRigidBodyComponent(
-        { mass: 1, linearDamping: 0.9 },
-        createBoxCollider(1, 1, 1)
+        { mass: 1, linearDamping: 0.9, angularDamping: 0.3 },
+        createBoxCollider(10, 10, 10)
       ),
       new TPlayerInputComponent(),
       new PlayerMovementComponent(),
