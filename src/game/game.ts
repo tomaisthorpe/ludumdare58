@@ -14,6 +14,8 @@ import { RopeLinksSystem, createRopeLinks } from "./rope";
 
 export default class GameState extends TGameState {
   public lootSystem!: LootSystem;
+  public day = 1;
+  public money = 0;
 
   public async onCreate() {
     this.onReady();
@@ -22,7 +24,7 @@ export default class GameState extends TGameState {
   public beforeWorldCreate() {
     this.world!.config.mode = "2d";
     // this.world!.config.gravity = vec3.fromValues(0, 0, 0);
-    this.world!.physicsDebug = true;
+    // this.world!.physicsDebug = true;
   }
 
   public onReady() {
@@ -42,8 +44,15 @@ export default class GameState extends TGameState {
     createWater(this.world);
     createBoat(this.world);
     this.lootSystem = createLoot(this.world, (value: number) => {
-      console.log("Collected", value);
+      this.money += value;
+      this.refreshGameContext();
     });
+
+    this.refreshGameContext();
+  }
+
+  private refreshGameContext() {
+    this.engine.updateGameContext({ money: this.money, day: this.day });
   }
 
   public onUpdate() {}

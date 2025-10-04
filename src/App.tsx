@@ -2,6 +2,7 @@ import "./App.css";
 
 import { TGame } from "@tedengine/ted";
 import game from "./game/game?worker";
+import Stats from "./Stats";
 
 function App() {
   return (
@@ -16,7 +17,9 @@ function App() {
             showAudioToggle: false,
           }}
           game={new game()}
-        />
+        >
+          <Stats />
+        </TGame>
       </div>
     </>
   );
