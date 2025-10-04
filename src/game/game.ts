@@ -10,7 +10,7 @@ import { createBoat } from "./boat";
 import { createCamera } from "./camera";
 import { createMagnet } from "./magnet";
 import { createLoot } from "./loot.ts";
-import { RopeSystem, createRope } from "./rope";
+import { RopeLinksSystem, createRopeLinks } from "./rope";
 
 export default class GameState extends TGameState {
   public async onCreate() {
@@ -32,11 +32,12 @@ export default class GameState extends TGameState {
     );
 
     this.world.addSystem(new PlayerMovementSystem(this.world));
-    this.world.addSystem(new RopeSystem(this.world));
+    this.world.addSystem(new RopeLinksSystem(this.world));
 
     createCamera(this.world, this.engine.inputManager);
     createMagnet(this.world);
-    createRope(this.world);
+    // createRope(this.world);
+    createRopeLinks(this.world);
     createWater(this.world);
     createBoat(this.world);
     createLoot(this.world);
