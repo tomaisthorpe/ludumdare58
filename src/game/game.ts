@@ -27,6 +27,7 @@ export default class GameState extends TGameState {
   public state: "start" | "fishing" | "upgrade" = "start";
 
   public dropMagnet!: () => void;
+  public resetMagnet!: () => void;
 
   public async onCreate() {
     this.onReady();
@@ -50,7 +51,8 @@ export default class GameState extends TGameState {
     this.world.addSystem(new RopeLinksSystem(this.world));
 
     createCamera(this.world, this.engine.inputManager);
-    const { dropMagnet } = createMagnet(this.world);
+    const { dropMagnet, resetMagnet } = createMagnet(this.world);
+    this.resetMagnet = resetMagnet.bind(this);
     this.dropMagnet = dropMagnet.bind(this);
 
     createRopeLinks(this.world);
@@ -93,7 +95,7 @@ export default class GameState extends TGameState {
     this.day++;
 
     this.state = "upgrade";
-    this.world!.pause();
+    this.resetMagnet();
   }
 
   public onUpdate(_: TEngine, delta: number) {

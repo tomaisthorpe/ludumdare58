@@ -14,6 +14,7 @@ import {
   TSystem,
   TEntityQuery,
   TComponent,
+  TEngine,
 } from "@tedengine/ted";
 import { vec3 } from "gl-matrix";
 import config from "./config";
@@ -66,12 +67,19 @@ export function createMagnet(world: TWorld) {
     magnetComponent.ropeLength = 400;
   };
 
+  const resetMagnet = () => {
+    magnetComponent.shouldReset = true;
+  };
+
   return {
     dropMagnet,
+    resetMagnet,
   };
 }
 export class MagnetComponent extends TComponent {
   public ropeLength = 0;
+  public shouldReset = false;
+
   constructor() {
     super();
   }
@@ -94,6 +102,14 @@ export class MagnetSystem extends TSystem {
 
       const transform = world.getComponent(entity, TTransformComponent);
       if (!transform) continue;
+
+      if (magnet.shouldReset) {
+        transform.transform.translation[0] = config.topLeftCorner.x + 300;
+        transform.transform.translation[1] = startY;
+        world.updateTransform(entity, transform.transform);
+        magnet.shouldReset = false;
+        magnet.ropeLength = 0;
+      }
 
       // Ensure magnet doesn't go further than rope length
       const ropeLength = magnet.ropeLength;
