@@ -4,7 +4,11 @@ const config = {
   waterWidth: 800,
   waterColor: [0.5, 0.624, 0.72, 0.8],
   waterLevel: 400, // How far down the water is when at the surface
-  palette: {},
+  palette: {
+    rope: [0.3, 0.3, 0.3, 1],
+    loot: [0.5, 0.2, 0.2, 1],
+    magnet: [0.337, 0.522, 0.345, 1],
+  },
 
   // Top left corner of the screen
   topLeftCorner: {

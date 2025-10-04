@@ -15,6 +15,7 @@ import {
 import { vec3, quat } from "gl-matrix";
 import config from "./config";
 import { PlayerMovementComponent } from "./player-movement";
+import { overridePalette } from "./utils";
 
 export class RopeLinksComponent extends TComponent {
   public anchorX?: number;
@@ -56,7 +57,10 @@ export function createRopeLinks(world: TWorld) {
     baseSegmentLength,
     ropeDepth
   );
-  // Optionally set color via material.palette
+  segmentMesh.material.palette = overridePalette(
+    segmentMesh.material.palette!,
+    config.palette.rope as [number, number, number, number]
+  );
 
   const comp = world.getComponent(controller, RopeLinksComponent)!;
 
@@ -192,6 +196,10 @@ export class RopeLinksSystem extends TSystem {
           const toAdd = desiredSegments - rope.numSegments;
           for (let i = 0; i < toAdd; i++) {
             const mesh = createBoxMesh(2, rope.baseSegmentLength, 8);
+            mesh.material.palette = overridePalette(
+              mesh.material.palette!,
+              config.palette.rope as [number, number, number, number]
+            );
             const seg = world.createEntity();
             world.addComponents(seg, [
               TTransformBundle.with(

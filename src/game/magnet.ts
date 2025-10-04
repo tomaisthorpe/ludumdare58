@@ -15,9 +15,14 @@ import {
 import { vec3 } from "gl-matrix";
 import config from "./config";
 import { PlayerMovementComponent } from "./player-movement";
+import { overridePalette } from "./utils";
 
 export function createMagnet(world: TWorld) {
   const boxMesh = createBoxMesh(10, 10, 10);
+  boxMesh.material.palette = overridePalette(
+    boxMesh.material.palette!,
+    config.palette.magnet as [number, number, number, number]
+  );
   const magnet = world.createEntity();
   world.addComponents(magnet, [
     TTransformBundle.with(

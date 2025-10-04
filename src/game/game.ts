@@ -36,7 +36,6 @@ export default class GameState extends TGameState {
 
     createCamera(this.world, this.engine.inputManager);
     createMagnet(this.world);
-    // createRope(this.world);
     createRopeLinks(this.world);
     createWater(this.world);
     createBoat(this.world);

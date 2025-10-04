@@ -16,6 +16,8 @@ import {
 } from "@tedengine/ted";
 import { vec3 } from "gl-matrix";
 import { PlayerMovementComponent } from "./player-movement";
+import config from "./config";
+import { overridePalette } from "./utils";
 
 export function createLoot(world: TWorld) {
   world.addSystem(new LootSystem(world));
@@ -27,6 +29,12 @@ export function createLoot(world: TWorld) {
 
 export function spawnLoot(world: TWorld, x: number, y: number) {
   const boxMesh = createBoxMesh(15, 15, 15);
+
+  boxMesh.material.palette = overridePalette(
+    boxMesh.material.palette!,
+    config.palette.loot as [number, number, number, number]
+  );
+
   const loot = world.createEntity();
   world.addComponents(loot, [
     TTransformBundle.with(
