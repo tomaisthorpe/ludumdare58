@@ -13,11 +13,12 @@ function App() {
     <>
       <div>
         <TGame
+          aspectRatio="4 / 3"
           config={{
             renderWidth: 800,
             renderHeight: 600,
             imageRendering: "pixelated",
-            showFullscreenToggle: false,
+            showFullscreenToggle: true,
             showAudioToggle: false,
           }}
           game={new game()}
