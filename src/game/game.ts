@@ -9,10 +9,12 @@ import { createWater } from "./water";
 import { createBoat } from "./boat";
 import { createCamera } from "./camera";
 import { createMagnet } from "./magnet";
-import { createLoot } from "./loot.ts";
+import { createLoot, LootSystem } from "./loot.ts";
 import { RopeLinksSystem, createRopeLinks } from "./rope";
 
 export default class GameState extends TGameState {
+  public lootSystem!: LootSystem;
+
   public async onCreate() {
     this.onReady();
   }
@@ -39,8 +41,12 @@ export default class GameState extends TGameState {
     createRopeLinks(this.world);
     createWater(this.world);
     createBoat(this.world);
-    createLoot(this.world);
+    this.lootSystem = createLoot(this.world, (value: number) => {
+      console.log("Collected", value);
+    });
   }
+
+  public onUpdate() {}
 }
 
 const gameConfig = {

@@ -19,12 +19,18 @@ import { PlayerMovementComponent } from "./player-movement";
 import config from "./config";
 import { overridePalette } from "./utils";
 
-export function createLoot(world: TWorld) {
-  world.addSystem(new LootSystem(world));
+export function createLoot(
+  world: TWorld,
+  onCollect: (value: number) => void
+): LootSystem {
+  const lootSystem = new LootSystem(world, onCollect);
+  world.addSystem(lootSystem);
 
   spawnLoot(world, 0, -400);
   spawnLoot(world, 100, -400);
   spawnLoot(world, -100, -400);
+
+  return lootSystem;
 }
 
 export function spawnLoot(world: TWorld, x: number, y: number) {
@@ -51,13 +57,21 @@ export function spawnLoot(world: TWorld, x: number, y: number) {
   ]);
 }
 
-export class LootComponent extends TComponent {}
+export class LootComponent extends TComponent {
+  public magnetised: boolean = false;
+  public value: number = 10;
+}
 
 export class LootSystem extends TSystem {
   private query: TEntityQuery;
   private playerQuery: TEntityQuery;
 
-  constructor(private world: TWorld) {
+  public currentValue: number = 0;
+
+  constructor(
+    private world: TWorld,
+    private onCollect: (value: number) => void
+  ) {
     super();
     this.query = this.world.createQuery([LootComponent]);
     this.playerQuery = this.world.createQuery([PlayerMovementComponent]);
@@ -69,6 +83,8 @@ export class LootSystem extends TSystem {
 
     if (players.length === 0) return;
     const player = players[0];
+
+    this.currentValue = 0;
 
     for (const entity of entities) {
       const loot = world.getComponents(entity)?.get(LootComponent);
@@ -109,8 +125,28 @@ export class LootSystem extends TSystem {
         vec3.normalize(force, force);
         vec3.scale(force, force, 20);
         totalForce = vec3.add(totalForce, totalForce, force);
+        loot.magnetised = true;
+      } else if (distance <= 20) {
+        loot.magnetised = true;
+      } else {
+        loot.magnetised = false;
       }
-      world.applyCentralForce(entity, totalForce);
+
+      if (loot.magnetised) {
+        this.currentValue += loot.value;
+      }
+
+      // If loot is magnitised and near the water level, then it should be removed
+      if (
+        loot.magnetised &&
+        lootTransform.transform.translation[1] >
+          config.topLeftCorner.y - config.waterLevel - 50
+      ) {
+        this.onCollect(loot.value);
+        world.removeEntity(entity);
+      } else {
+        world.applyCentralForce(entity, totalForce);
+      }
     }
   }
 }
