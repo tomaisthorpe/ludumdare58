@@ -47,7 +47,7 @@ export default class GameState extends TGameState {
       new TPlayerInputSystem(this.world, this.engine.inputManager)
     );
 
-    this.world.addSystem(new PlayerMovementSystem(this.world));
+    this.world.addSystem(new PlayerMovementSystem(this.world, this));
     this.world.addSystem(new RopeLinksSystem(this.world));
 
     createCamera(this.world, this.engine.inputManager);

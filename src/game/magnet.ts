@@ -109,6 +109,11 @@ export class MagnetSystem extends TSystem {
         world.updateTransform(entity, transform.transform);
         magnet.shouldReset = false;
         magnet.ropeLength = 0;
+
+        world.updateBodyOptions(entity, {
+          linearVelocity: vec3.fromValues(0, 0, 0),
+          angularVelocity: vec3.fromValues(0, 0, 0),
+        });
       }
 
       // Ensure magnet doesn't go further than rope length
