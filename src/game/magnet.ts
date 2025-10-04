@@ -64,20 +64,26 @@ export function createMagnet(world: TWorld) {
     const opt = magnetBody.physicsOptions;
     opt.isTrigger = true;
     magnetBody.physicsOptions = opt;
-    magnetComponent.ropeLength = 400;
+    magnetComponent.ropeLength = magnetComponent.playerRopeLength;
   };
 
   const resetMagnet = () => {
     magnetComponent.shouldReset = true;
   };
 
+  const changeRopeLength = (length: number) => {
+    magnetComponent.playerRopeLength = length;
+  };
+
   return {
     dropMagnet,
     resetMagnet,
+    changeRopeLength,
   };
 }
 export class MagnetComponent extends TComponent {
   public ropeLength = 0;
+  public playerRopeLength = config.equipment.ropeLengths[0];
   public shouldReset = false;
 
   constructor() {

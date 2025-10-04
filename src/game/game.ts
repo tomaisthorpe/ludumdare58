@@ -34,6 +34,7 @@ export default class GameState extends TGameState {
 
   public dropMagnet!: () => void;
   public resetMagnet!: () => void;
+  public changeRopeLength!: (length: number) => void;
 
   public async onCreate() {
     this.onReady();
@@ -57,9 +58,12 @@ export default class GameState extends TGameState {
     this.world.addSystem(new RopeLinksSystem(this.world));
 
     createCamera(this.world, this.engine.inputManager);
-    const { dropMagnet, resetMagnet } = createMagnet(this.world);
+    const { dropMagnet, resetMagnet, changeRopeLength } = createMagnet(
+      this.world
+    );
     this.resetMagnet = resetMagnet.bind(this);
     this.dropMagnet = dropMagnet.bind(this);
+    this.changeRopeLength = changeRopeLength.bind(this);
 
     createRopeLinks(this.world);
     createWater(this.world);
@@ -91,6 +95,9 @@ export default class GameState extends TGameState {
           break;
         case "ropeLength":
           this.equipment.ropeLength = upgrade.level;
+          this.changeRopeLength(
+            config.equipment.ropeLengths[upgrade.level - 1]
+          );
       }
     });
 
