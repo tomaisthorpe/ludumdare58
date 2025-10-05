@@ -68,6 +68,7 @@ export const resources: TResourcePackConfig = {
       url: sprayTexture,
       config: {
         filter: TTextureFilter.Nearest,
+        wrapT: TTextureWrap.ClampToEdge,
       },
     },
   ],
