@@ -18,6 +18,7 @@ import {
   TTexture,
   TOriginPoint,
   TSpriteComponent,
+  TSpriteLayer,
 } from "@tedengine/ted";
 import { vec3 } from "gl-matrix";
 import config from "./config";
@@ -63,6 +64,7 @@ export function createMagnet(engine: TEngine, world: TWorld) {
       width: 10,
       height: 10,
       origin: TOriginPoint.Center,
+      layer: TSpriteLayer.Foreground_4,
     }),
     new TTextureComponent(engine.resources.get<TTexture>(magnetTexture)!),
     new TVisibilityComponent(),
