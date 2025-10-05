@@ -1,8 +1,5 @@
 import {
-  createPlaneMesh,
   TEngine,
-  TMaterialComponent,
-  TMeshComponent,
   TOriginPoint,
   TResourcePackConfig,
   TSpriteComponent,
@@ -10,6 +7,7 @@ import {
   TTexture,
   TTextureComponent,
   TTextureFilter,
+  TTextureWrap,
   TTransform,
   TTransformBundle,
   TTransformComponent,
@@ -26,6 +24,8 @@ export const resources: TResourcePackConfig = {
       url: boatTexture,
       config: {
         filter: TTextureFilter.Nearest,
+        wrapS: TTextureWrap.ClampToEdge,
+        wrapT: TTextureWrap.ClampToEdge,
       },
     },
   ],

@@ -17,6 +17,7 @@ import {
   TTexture,
   TTextureComponent,
   TTextureFilter,
+  TTextureWrap,
 } from "@tedengine/ted";
 import { vec3, quat } from "gl-matrix";
 import { PlayerMovementComponent } from "./player-movement";
@@ -39,6 +40,8 @@ export const resources: TResourcePackConfig = {
       url: treasureTexture,
       config: {
         filter: TTextureFilter.Nearest,
+        wrapS: TTextureWrap.ClampToEdge,
+        wrapT: TTextureWrap.ClampToEdge,
       },
     },
     {

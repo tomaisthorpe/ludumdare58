@@ -43,7 +43,7 @@ export function createRopeLinks(world: TWorld) {
   const ropeThickness = 2;
   const ropeDepth = 8;
 
-  const anchorY = config.topLeftCorner.y - config.waterLevel + 150;
+  const anchorY = config.topLeftCorner.y - config.waterLevel + 110;
 
   // Controller entity that holds the rope data
   const controller = world.createEntity();

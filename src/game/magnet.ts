@@ -57,7 +57,7 @@ export function createMagnet(engine: TEngine, world: TWorld) {
   world.addComponents(magnet, [
     TTransformBundle.with(
       new TTransformComponent(
-        new TTransform(vec3.fromValues(config.topLeftCorner.x + 300, startY, 0))
+        new TTransform(vec3.fromValues(config.topLeftCorner.x + 331, startY, 0))
       )
     ),
     new TSpriteComponent({

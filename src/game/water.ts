@@ -22,6 +22,7 @@ import {
   TSystem,
   TEntityQuery,
   TSpriteLayer,
+  TTextureWrap,
 } from "@tedengine/ted";
 import { vec3, quat, vec2, vec4 } from "gl-matrix";
 import config from "./config";
@@ -45,6 +46,8 @@ export const resources: TResourcePackConfig = {
       url: seabedTexture,
       config: {
         filter: TTextureFilter.Nearest,
+        wrapS: TTextureWrap.ClampToEdge,
+        wrapT: TTextureWrap.ClampToEdge,
       },
     },
     {
