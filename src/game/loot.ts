@@ -39,6 +39,8 @@ export const resources: TResourcePackConfig = {
       url: coinTexture,
       config: {
         filter: TTextureFilter.Nearest,
+        wrapS: TTextureWrap.ClampToEdge,
+        wrapT: TTextureWrap.ClampToEdge,
       },
     },
     {
@@ -53,18 +55,24 @@ export const resources: TResourcePackConfig = {
       url: canTexture,
       config: {
         filter: TTextureFilter.Nearest,
+        wrapS: TTextureWrap.ClampToEdge,
+        wrapT: TTextureWrap.ClampToEdge,
       },
     },
     {
       url: gobletTexture,
       config: {
         filter: TTextureFilter.Nearest,
+        wrapS: TTextureWrap.ClampToEdge,
+        wrapT: TTextureWrap.ClampToEdge,
       },
     },
     {
       url: daggerTexture,
       config: {
         filter: TTextureFilter.Nearest,
+        wrapS: TTextureWrap.ClampToEdge,
+        wrapT: TTextureWrap.ClampToEdge,
       },
     },
   ],
