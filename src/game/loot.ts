@@ -18,11 +18,14 @@ import {
   TTextureComponent,
   TTextureFilter,
 } from "@tedengine/ted";
-import { vec3 } from "gl-matrix";
+import { vec3, quat } from "gl-matrix";
 import { PlayerMovementComponent } from "./player-movement";
-import config from "./config";
+import config, { LootType as ConfigLootType } from "./config";
 import coinTexture from "../assets/coin.png";
 import treasureTexture from "../assets/chest.png";
+import canTexture from "../assets/can.png";
+import gobletTexture from "../assets/goblet.png";
+import daggerTexture from "../assets/dagger.png";
 
 export const resources: TResourcePackConfig = {
   textures: [
@@ -34,6 +37,24 @@ export const resources: TResourcePackConfig = {
     },
     {
       url: treasureTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+    {
+      url: canTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+    {
+      url: gobletTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+    {
+      url: daggerTexture,
       config: {
         filter: TTextureFilter.Nearest,
       },
@@ -57,62 +78,83 @@ export function spawnLoot(
   world: TWorld,
   x: number,
   y: number,
-  type: LootType
+  type: LootType,
+  value: number
 ) {
-  if (type === "treasure") {
-    const loot = world.createEntity();
-    world.addComponents(loot, [
-      TTransformBundle.with(
-        new TTransformComponent(new TTransform(vec3.fromValues(x, y, 0)))
-      ),
-      new TSpriteComponent({
-        width: 98,
-        height: 64,
-        origin: TOriginPoint.Center,
-      }),
-      new TTextureComponent(engine.resources.get<TTexture>(treasureTexture)!),
-      new TVisibilityComponent(),
-      new TRigidBodyComponent(
-        {
-          mass: 0.1,
-          isTrigger: false,
-          linearDamping: 0.95,
-          angularDamping: 0.9,
-        },
-        createBoxCollider(98, 64, 15)
-      ),
-      new LootComponent(type, config.lootValues[type]),
-    ]);
+  let texture: TTexture | undefined;
+  let width = 16;
+  let height = 16;
+  let collider;
+
+  switch (type) {
+    case "treasure":
+      texture = engine.resources.get<TTexture>(treasureTexture);
+      width = 98;
+      height = 64;
+      collider = createBoxCollider(98, 64, 15);
+      break;
+    case "coin":
+      texture = engine.resources.get<TTexture>(coinTexture);
+      width = 16;
+      height = 16;
+      collider = createSphereCollider(8);
+      break;
+    case "can":
+      texture = engine.resources.get<TTexture>(canTexture);
+      width = 16;
+      height = 24;
+      collider = createBoxCollider(16, 24, 8);
+      break;
+    case "goblet":
+      texture = engine.resources.get<TTexture>(gobletTexture);
+      width = 16;
+      height = 32;
+      collider = createBoxCollider(16, 16, 8);
+      break;
+    case "dagger":
+      texture = engine.resources.get<TTexture>(daggerTexture);
+      width = 24;
+      height = 64;
+      collider = createBoxCollider(16, 16, 8);
+      break;
   }
 
-  if (type === "low") {
-    const loot = world.createEntity();
-    world.addComponents(loot, [
-      TTransformBundle.with(
-        new TTransformComponent(new TTransform(vec3.fromValues(x, y, 0)))
-      ),
-      new TSpriteComponent({
-        width: 16,
-        height: 16,
-        origin: TOriginPoint.Center,
-      }),
-      new TTextureComponent(engine.resources.get<TTexture>(coinTexture)!),
-      new TVisibilityComponent(),
-      new TRigidBodyComponent(
-        {
-          mass: 0.1,
-          isTrigger: false,
-          linearDamping: 0.95,
-          angularDamping: 0.9,
-        },
-        createSphereCollider(8)
-      ),
-      new LootComponent(type, config.lootValues[type]),
-    ]);
-  }
+  if (!texture) return;
+
+  // Create rotation - random for all items except treasure
+  const rotation =
+    type === "treasure"
+      ? quat.fromEuler(quat.create(), 0, 0, -2)
+      : quat.fromEuler(quat.create(), 0, 0, Math.random() * 360);
+
+  const loot = world.createEntity();
+  world.addComponents(loot, [
+    TTransformBundle.with(
+      new TTransformComponent(
+        new TTransform(vec3.fromValues(x, y, 0), rotation)
+      )
+    ),
+    new TSpriteComponent({
+      width,
+      height,
+      origin: TOriginPoint.Center,
+    }),
+    new TTextureComponent(texture),
+    new TVisibilityComponent(),
+    new TRigidBodyComponent(
+      {
+        mass: 0.1,
+        isTrigger: false,
+        linearDamping: 0.95,
+        angularDamping: 0.9,
+      },
+      collider
+    ),
+    new LootComponent(type, value),
+  ]);
 }
 
-export type LootType = "low" | "treasure";
+export type LootType = ConfigLootType | "treasure";
 export class LootComponent extends TComponent {
   public magnetised: boolean = false;
 
@@ -144,11 +186,42 @@ export class LootSystem extends TSystem {
       this.world.removeEntity(entity);
     }
 
-    spawnLoot(this.engine, this.world, 0, -400, "low");
-    spawnLoot(this.engine, this.world, 100, -400, "low");
-    spawnLoot(this.engine, this.world, -100, -400, "low");
+    // Spawn loot based on configuration
+    for (const lootConfig of config.loot) {
+      // Calculate how many to spawn based on density
+      const spawnRange = lootConfig.spawn.end - lootConfig.spawn.start;
+      const count = Math.floor((spawnRange / 100) * lootConfig.density);
 
-    spawnLoot(this.engine, this.world, -100, -600, "treasure");
+      for (let i = 0; i < count; i++) {
+        // Random position within spawn range, keeping 50 units from edges
+        const x = (Math.random() - 0.5) * (config.waterWidth - 100);
+        const depthBelowWater =
+          lootConfig.spawn.start + Math.random() * spawnRange;
+        const y = config.topLeftCorner.y - config.waterLevel - depthBelowWater;
+
+        spawnLoot(
+          this.engine,
+          this.world,
+          x,
+          y,
+          lootConfig.type,
+          lootConfig.value
+        );
+      }
+    }
+
+    // Always spawn treasure at the bottom, 60% across from the left
+    const treasureX = -config.waterWidth / 2 + config.waterWidth * 0.6;
+    const treasureY =
+      config.topLeftCorner.y - config.waterLevel - config.waterDepth + 50;
+    spawnLoot(
+      this.engine,
+      this.world,
+      treasureX,
+      treasureY,
+      "treasure",
+      Infinity
+    );
   }
 
   public async update(_: TEngine, world: TWorld) {

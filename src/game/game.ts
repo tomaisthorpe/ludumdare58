@@ -10,7 +10,7 @@ import {
   TResourcePack,
 } from "@tedengine/ted";
 import { PlayerMovementSystem } from "./player-movement";
-import { createWater } from "./water";
+import { createWater, resources as waterResources } from "./water";
 import { createBoat } from "./boat";
 import { createCamera } from "./camera";
 import { createMagnet } from "./magnet";
@@ -45,7 +45,7 @@ export default class GameState extends TGameState {
   public changeRopeLength!: (length: number) => void;
 
   public async onCreate() {
-    const rp = new TResourcePack(this.engine, lootResources);
+    const rp = new TResourcePack(this.engine, lootResources, waterResources);
     await rp.load();
 
     this.onReady();
@@ -78,7 +78,7 @@ export default class GameState extends TGameState {
     this.changeRopeLength = changeRopeLength.bind(this);
 
     createRopeLinks(this.world);
-    createWater(this.world);
+    createWater(this.engine, this.world);
     createBoat(this.world);
     this.lootSystem = createLoot(
       this.engine,

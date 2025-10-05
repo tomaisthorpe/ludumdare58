@@ -10,11 +10,37 @@ import {
   TVisibilityComponent,
   TWorld,
   createBoxCollider,
+  TResourcePackConfig,
+  TTextureFilter,
+  TEngine,
+  TSpriteComponent,
+  TTextureComponent,
+  TOriginPoint,
+  TTexture,
 } from "@tedengine/ted";
 import { vec3, quat } from "gl-matrix";
 import config from "./config";
+import waterTexture from "../assets/water2.png";
+import seabedTexture from "../assets/seabed.png";
 
-export function createWater(world: TWorld) {
+export const resources: TResourcePackConfig = {
+  textures: [
+    {
+      url: waterTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+    {
+      url: seabedTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+  ],
+};
+
+export function createWater(engine: TEngine, world: TWorld) {
   const waterMesh = createPlaneMesh(config.waterWidth, config.waterDepth);
 
   // Replace water material with water color
@@ -41,6 +67,27 @@ export function createWater(world: TWorld) {
     new TMaterialComponent(waterMesh.material),
     new TVisibilityComponent(),
   ]);
+
+  // Add seabed at the bottom (moved up slightly to be visible)
+  const seabedY =
+    config.topLeftCorner.y - config.waterLevel - config.waterDepth;
+  const seabedTexture2 = engine.resources.get<TTexture>(seabedTexture);
+  if (seabedTexture2) {
+    world.createEntity([
+      TTransformBundle.with(
+        new TTransformComponent(
+          new TTransform(vec3.fromValues(0, seabedY, -98))
+        )
+      ),
+      new TSpriteComponent({
+        width: config.waterWidth,
+        height: 100, // Adjust based on your texture's aspect ratio
+        origin: TOriginPoint.BottomCenter,
+      }),
+      new TTextureComponent(seabedTexture2),
+      new TVisibilityComponent(),
+    ]);
+  }
 
   // Add boundary box colliders to stop magnet going out of bounds
   // Top

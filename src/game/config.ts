@@ -1,3 +1,14 @@
+export type LootType = "can" | "coin" | "goblet" | "dagger";
+export type LootConfig = {
+  type: LootType;
+  value: number;
+  spawn: {
+    start: number; // start y below water level
+    end: number; // end y below water level
+  };
+  density: number;
+};
+
 const config = {
   gameHeight: 600,
   waterDepth: 500,
@@ -9,6 +20,45 @@ const config = {
     loot: [0.5, 0.2, 0.2, 1],
     magnet: [0.337, 0.522, 0.345, 1],
   },
+
+  loot: [
+    {
+      type: "can",
+      value: 5,
+      spawn: {
+        start: 200,
+        end: 400,
+      },
+      density: 1,
+    },
+    {
+      type: "coin",
+      value: 10,
+      spawn: {
+        start: 100,
+        end: 300,
+      },
+      density: 1,
+    },
+    {
+      type: "goblet",
+      value: 20,
+      spawn: {
+        start: 300,
+        end: 700,
+      },
+      density: 0.5,
+    },
+    {
+      type: "dagger",
+      value: 50,
+      spawn: {
+        start: 80,
+        end: 400,
+      },
+      density: 0.5,
+    },
+  ] as LootConfig[],
 
   equipment: {
     winchSpeeds: [150, 250, 450],
