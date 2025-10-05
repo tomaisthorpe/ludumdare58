@@ -25,7 +25,7 @@ export function Victory() {
       style={{ transform: `scale(${scaling})`, transformOrigin: "center" }}
     >
       <h1>You win!</h1>
-      <p>You have collected the treasure.</p>
+      <p>You have collected the treasure.<br />Thank you for playing!</p>
     </Container>
   );
 }
