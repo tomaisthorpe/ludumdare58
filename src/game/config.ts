@@ -53,8 +53,8 @@ const config = {
       type: "dagger",
       value: 80,
       spawn: {
-        start: 800,
-        end: 1000,
+        start: 750,
+        end: 900,
       },
       density: 0.5,
     },
