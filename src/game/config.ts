@@ -29,45 +29,47 @@ const config = {
         start: 200,
         end: 400,
       },
-      density: 1,
+      density: 2,
     },
     {
       type: "coin",
       value: 10,
       spawn: {
-        start: 100,
-        end: 300,
+        start: 300,
+        end: 600,
       },
-      density: 1,
+      density: 1.2,
     },
     {
       type: "goblet",
-      value: 20,
+      value: 25,
       spawn: {
-        start: 300,
+        start: 550,
         end: 700,
       },
-      density: 0.5,
+      density: 1.0,
     },
     {
       type: "dagger",
-      value: 50,
+      value: 80,
       spawn: {
-        start: 80,
-        end: 400,
+        start: 800,
+        end: 1000,
       },
       density: 0.5,
     },
   ] as LootConfig[],
 
   equipment: {
-    winchSpeeds: [150, 250, 450],
-    ropeLengths: [10000, 200, 600],
+    winchSpeeds: [75, 125, 200],
+    winchCosts: [30, 60, 0],
+    ropeLengths: [450, 650, 825, 1200],
+    ropeCosts: [20, 80, 140, 200, 0],
     maxWinchSpeed: 3,
-    maxRopeLength: 3,
+    maxRopeLength: 4,
   },
 
-  dayLength: 10, // in seconds
+  dayLength: 30, // in seconds
 
   // Top left corner of the screen
   topLeftCorner: {

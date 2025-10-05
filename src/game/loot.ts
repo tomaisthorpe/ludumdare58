@@ -19,6 +19,7 @@ import {
   TTextureFilter,
   TTextureWrap,
   TSound,
+  TSpriteLayer,
 } from "@tedengine/ted";
 import { vec3, quat } from "gl-matrix";
 import { PlayerMovementComponent } from "./player-movement";
@@ -145,6 +146,7 @@ export function spawnLoot(
       width,
       height,
       origin: TOriginPoint.Center,
+      layer: TSpriteLayer.Foreground_3,
     }),
     new TTextureComponent(texture),
     new TVisibilityComponent(),
@@ -320,7 +322,7 @@ export class LootSystem extends TSystem {
       if (
         loot.magnetised &&
         lootTransform.transform.translation[1] >
-          config.topLeftCorner.y - config.waterLevel - 50
+          config.topLeftCorner.y - config.waterLevel - 75
       ) {
         this.onCollect(loot.type, loot.value);
         this.collectSoundQueue++;

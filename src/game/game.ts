@@ -31,7 +31,7 @@ export default class GameState extends TGameState {
   public playerMovementSystem!: PlayerMovementSystem;
 
   public day = 1;
-  public money = 100;
+  public money = 0;
   public instructionsRead = false;
 
   public timeLeft = config.dayLength;

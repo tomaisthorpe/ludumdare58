@@ -124,15 +124,15 @@ export function UpdateModal() {
       type: "winchSpeed",
       name: "Winch Speed",
       description: "Upgrade your winch speed.",
-      cost: 10,
+      cost: config.equipment.winchCosts[equipmentLevels!.winchSpeed - 1],
       maxLevel: config.equipment.maxWinchSpeed,
       currentLevel: equipmentLevels!.winchSpeed || 1,
     },
     {
       type: "ropeLength",
       name: "Rope Length",
-      description: "Upgrade your rope length reach deeper waters.",
-      cost: 10,
+      description: "Upgrade your rope length to reach deeper waters.",
+      cost: config.equipment.ropeCosts[equipmentLevels!.ropeLength - 1],
       maxLevel: config.equipment.maxRopeLength,
       currentLevel: equipmentLevels!.ropeLength || 1,
     },
@@ -166,7 +166,7 @@ export function UpdateModal() {
             <Upgrade key={upgrade.name}>
               <h3>{upgrade.name}</h3>
               <p>{upgrade.description}</p>
-              <p className="cost">${upgrade.cost}</p>
+              {upgrade.cost > 0 && <p className="cost">${upgrade.cost}</p>}
               <p>
                 Level {upgrade.currentLevel}/{upgrade.maxLevel}
               </p>
