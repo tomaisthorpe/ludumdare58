@@ -22,7 +22,7 @@ const BarBackground = styled.div`
 
 const BarFill = styled.div`
   height: 100%;
-  transition: width 0.1s linear, background-color 0.3s ease;
+  transition: background-color 0.3s ease;
 `;
 
 function getColorForProgress(progress: number): string {
