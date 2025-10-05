@@ -91,6 +91,7 @@ export function Instructions() {
           <li>Space to start the day</li>
           <li>Bring items to the surface to collect them</li>
           <li>Upgrade your equpment at the end of the day</li>
+          <li>Be careful of the eels!</li>
         </ul>
       </Modal>
     </Container>
