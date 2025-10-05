@@ -13,44 +13,107 @@ import {
   TSystem,
   TEntityQuery,
   TEngine,
+  TResourcePackConfig,
+  createSphereCollider,
+  TOriginPoint,
+  TSpriteComponent,
+  TTexture,
+  TTextureComponent,
+  TTextureFilter,
 } from "@tedengine/ted";
 import { vec3 } from "gl-matrix";
 import { PlayerMovementComponent } from "./player-movement";
 import config from "./config";
 import { overridePalette } from "./utils";
+import coinTexture from "../assets/coin.png";
+import treasureTexture from "../assets/chest.png";
+
+export const resources: TResourcePackConfig = {
+  textures: [
+    {
+      url: coinTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+    {
+      url: treasureTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+  ],
+};
 
 export function createLoot(
+  engine: TEngine,
   world: TWorld,
   onCollect: (type: LootType, value: number) => void
 ): LootSystem {
-  const lootSystem = new LootSystem(world, onCollect);
+  const lootSystem = new LootSystem(engine, world, onCollect);
   world.addSystem(lootSystem);
 
   return lootSystem;
 }
 
-export function spawnLoot(world: TWorld, x: number, y: number, type: LootType) {
-  const boxMesh = createBoxMesh(15, 15, 15);
+export function spawnLoot(
+  engine: TEngine,
+  world: TWorld,
+  x: number,
+  y: number,
+  type: LootType
+) {
+  if (type === "treasure") {
+    const loot = world.createEntity();
+    world.addComponents(loot, [
+      TTransformBundle.with(
+        new TTransformComponent(new TTransform(vec3.fromValues(x, y, 0)))
+      ),
+      new TSpriteComponent({
+        width: 98,
+        height: 64,
+        origin: TOriginPoint.Center,
+      }),
+      new TTextureComponent(engine.resources.get<TTexture>(treasureTexture)!),
+      new TVisibilityComponent(),
+      new TRigidBodyComponent(
+        {
+          mass: 0.1,
+          isTrigger: false,
+          linearDamping: 0.95,
+          angularDamping: 0.9,
+        },
+        createBoxCollider(98, 64, 15)
+      ),
+      new LootComponent(type, config.lootValues[type]),
+    ]);
+  }
 
-  boxMesh.material.palette = overridePalette(
-    boxMesh.material.palette!,
-    config.palette.loot as [number, number, number, number]
-  );
-
-  const loot = world.createEntity();
-  world.addComponents(loot, [
-    TTransformBundle.with(
-      new TTransformComponent(new TTransform(vec3.fromValues(x, y, 0)))
-    ),
-    new TMeshComponent({ source: "inline", geometry: boxMesh.geometry }),
-    new TMaterialComponent(boxMesh.material),
-    new TVisibilityComponent(),
-    new TRigidBodyComponent(
-      { mass: 0.1, isTrigger: false, linearDamping: 0.95, angularDamping: 0.9 },
-      createBoxCollider(15, 15, 15)
-    ),
-    new LootComponent(type, config.lootValues[type]),
-  ]);
+  if (type === "low") {
+    const loot = world.createEntity();
+    world.addComponents(loot, [
+      TTransformBundle.with(
+        new TTransformComponent(new TTransform(vec3.fromValues(x, y, 0)))
+      ),
+      new TSpriteComponent({
+        width: 16,
+        height: 16,
+        origin: TOriginPoint.Center,
+      }),
+      new TTextureComponent(engine.resources.get<TTexture>(coinTexture)!),
+      new TVisibilityComponent(),
+      new TRigidBodyComponent(
+        {
+          mass: 0.1,
+          isTrigger: false,
+          linearDamping: 0.95,
+          angularDamping: 0.9,
+        },
+        createSphereCollider(8)
+      ),
+      new LootComponent(type, config.lootValues[type]),
+    ]);
+  }
 }
 
 export type LootType = "low" | "treasure";
@@ -69,6 +132,7 @@ export class LootSystem extends TSystem {
   public currentValue: number = 0;
 
   constructor(
+    private engine: TEngine,
     private world: TWorld,
     private onCollect: (type: LootType, value: number) => void
   ) {
@@ -84,11 +148,11 @@ export class LootSystem extends TSystem {
       this.world.removeEntity(entity);
     }
 
-    spawnLoot(this.world, 0, -400, "low");
-    spawnLoot(this.world, 100, -400, "low");
-    spawnLoot(this.world, -100, -400, "low");
+    spawnLoot(this.engine, this.world, 0, -400, "low");
+    spawnLoot(this.engine, this.world, 100, -400, "low");
+    spawnLoot(this.engine, this.world, -100, -400, "low");
 
-    spawnLoot(this.world, -100, -600, "treasure");
+    spawnLoot(this.engine, this.world, -100, -600, "treasure");
   }
 
   public async update(_: TEngine, world: TWorld) {

@@ -7,13 +7,19 @@ import {
   TTransformComponent,
   TFixedAxisCameraTargetComponent,
   TKeyDownEvent,
+  TResourcePack,
 } from "@tedengine/ted";
 import { PlayerMovementSystem } from "./player-movement";
 import { createWater } from "./water";
 import { createBoat } from "./boat";
 import { createCamera } from "./camera";
 import { createMagnet } from "./magnet";
-import { createLoot, LootSystem, LootType } from "./loot.ts";
+import {
+  createLoot,
+  LootSystem,
+  LootType,
+  resources as lootResources,
+} from "./loot.ts";
 import { RopeLinksSystem, createRopeLinks } from "./rope";
 import { vec3, vec4, mat4 } from "gl-matrix";
 import config from "./config";
@@ -39,6 +45,9 @@ export default class GameState extends TGameState {
   public changeRopeLength!: (length: number) => void;
 
   public async onCreate() {
+    const rp = new TResourcePack(this.engine, lootResources);
+    await rp.load();
+
     this.onReady();
   }
 
@@ -72,6 +81,7 @@ export default class GameState extends TGameState {
     createWater(this.world);
     createBoat(this.world);
     this.lootSystem = createLoot(
+      this.engine,
       this.world,
       (type: LootType, value: number) => {
         if (type === "treasure") {
