@@ -1,11 +1,8 @@
 import {
   TWorld,
-  createBoxMesh,
   TTransformBundle,
   TTransformComponent,
   TTransform,
-  TMeshComponent,
-  TMaterialComponent,
   TVisibilityComponent,
   TRigidBodyComponent,
   createBoxCollider,
@@ -15,23 +12,35 @@ import {
   TEntityQuery,
   TComponent,
   TEngine,
+  TResourcePackConfig,
+  TTextureFilter,
+  TTextureComponent,
+  TTexture,
+  TOriginPoint,
+  TSpriteComponent,
 } from "@tedengine/ted";
 import { vec3 } from "gl-matrix";
 import config from "./config";
 import { PlayerMovementComponent } from "./player-movement";
-import { overridePalette } from "./utils";
+import magnetTexture from "../assets/magnet.png";
 
 const startY = config.topLeftCorner.y - config.waterLevel + 30;
 const underwaterStartY = config.topLeftCorner.y - config.waterLevel - 20;
 
-export function createMagnet(world: TWorld) {
+export const resources: TResourcePackConfig = {
+  textures: [
+    {
+      url: magnetTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+  ],
+};
+
+export function createMagnet(engine: TEngine, world: TWorld) {
   world.addSystem(new MagnetSystem(world));
 
-  const boxMesh = createBoxMesh(10, 10, 10);
-  boxMesh.material.palette = overridePalette(
-    boxMesh.material.palette!,
-    config.palette.magnet as [number, number, number, number]
-  );
   const magnet = world.createEntity();
   const magnetBody = new TRigidBodyComponent(
     {
@@ -50,8 +59,12 @@ export function createMagnet(world: TWorld) {
         new TTransform(vec3.fromValues(config.topLeftCorner.x + 300, startY, 0))
       )
     ),
-    new TMeshComponent({ source: "inline", geometry: boxMesh.geometry }),
-    new TMaterialComponent(boxMesh.material),
+    new TSpriteComponent({
+      width: 10,
+      height: 10,
+      origin: TOriginPoint.Center,
+    }),
+    new TTextureComponent(engine.resources.get<TTexture>(magnetTexture)!),
     new TVisibilityComponent(),
     magnetBody,
     new TPlayerInputComponent(),
