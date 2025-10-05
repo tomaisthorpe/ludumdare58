@@ -166,6 +166,8 @@ export default class GameState extends TGameState {
       state: this.state,
       equipment: this.equipment,
       instructionsRead: this.instructionsRead,
+      timeLeft: this.timeLeft,
+      dayLength: config.dayLength,
     });
   }
 

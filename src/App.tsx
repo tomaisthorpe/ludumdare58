@@ -8,6 +8,7 @@ import { UpdateModal } from "./UpdateModal";
 import { StartNextDay } from "./StartNextDay";
 import { Victory } from "./Victory";
 import { Instructions } from "./Instructions";
+import DayProgressBar from "./DayProgressBar";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           game={new game()}
         >
           <Stats />
+          <DayProgressBar />
           <MagnetMonitor />
           <UpdateModal />
           <Instructions />
