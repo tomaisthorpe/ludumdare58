@@ -18,12 +18,16 @@ import {
   TOriginPoint,
   TTexture,
   TAnimatedSpriteComponent,
+  TComponent,
+  TSystem,
+  TEntityQuery,
 } from "@tedengine/ted";
 import { vec3, quat } from "gl-matrix";
 import config from "./config";
 import waterTexture from "../assets/water2.png";
 import seabedTexture from "../assets/seabed.png";
 import plantTexture from "../assets/plant.png";
+import { MagnetComponent } from "./magnet";
 
 export const resources: TResourcePackConfig = {
   textures: [
@@ -47,6 +51,94 @@ export const resources: TResourcePackConfig = {
     },
   ],
 };
+
+// Component to tag the water entity
+export class WaterComponent extends TComponent {
+  constructor() {
+    super();
+  }
+}
+
+// System to update water color based on magnet depth
+export class WaterColorSystem extends TSystem {
+  private waterQuery: TEntityQuery;
+  private magnetQuery: TEntityQuery;
+  private readonly topColor = [0.5, 0.624, 0.72, 0.8] as [
+    number,
+    number,
+    number,
+    number
+  ];
+  private readonly darkColor = [0.2, 0.3, 0.4, 0.8] as [
+    number,
+    number,
+    number,
+    number
+  ];
+
+  constructor(world: TWorld) {
+    super();
+    this.waterQuery = world.createQuery([WaterComponent, TMaterialComponent]);
+    this.magnetQuery = world.createQuery([
+      MagnetComponent,
+      TTransformComponent,
+    ]);
+  }
+
+  public async update(_: TEngine, world: TWorld): Promise<void> {
+    const waterEntities = this.waterQuery.execute();
+    const magnetEntities = this.magnetQuery.execute();
+
+    if (waterEntities.length === 0 || magnetEntities.length === 0) return;
+
+    const waterEntity = waterEntities[0];
+    const magnetEntity = magnetEntities[0];
+
+    const magnetTransform = world.getComponent(
+      magnetEntity,
+      TTransformComponent
+    );
+    if (!magnetTransform) return;
+
+    // Calculate magnet's depth below water surface
+    const waterSurfaceY = config.topLeftCorner.y - config.waterLevel;
+    const magnetY = magnetTransform.transform.translation[1];
+    const depth = waterSurfaceY - magnetY;
+
+    // Determine color based on depth relative to total water depth
+    let color: [number, number, number, number];
+
+    const startDarkeningDepth = 200; // Start darkening at this depth
+    const maxDepth = config.waterDepth; // Full dark at the bottom
+
+    if (depth < startDarkeningDepth) {
+      // Shallow water: use top color
+      color = [...this.topColor];
+    } else if (depth < maxDepth) {
+      // Gradually darken from start depth to bottom
+      const t =
+        (depth - startDarkeningDepth) / (maxDepth - startDarkeningDepth);
+      color = [
+        this.topColor[0] + (this.darkColor[0] - this.topColor[0]) * t,
+        this.topColor[1] + (this.darkColor[1] - this.topColor[1]) * t,
+        this.topColor[2] + (this.darkColor[2] - this.topColor[2]) * t,
+        this.topColor[3] + (this.darkColor[3] - this.topColor[3]) * t,
+      ];
+    } else {
+      // At the bottom: use dark color
+      color = [...this.darkColor];
+    }
+
+    // Update the water material palette (the engine now detects and applies changes)
+    const materialComponent = world.getComponent(
+      waterEntity,
+      TMaterialComponent
+    );
+    if (materialComponent) {
+      materialComponent.material.palette = { primary: color };
+    }
+  }
+}
 
 export function spawnPlant(
   engine: TEngine,
@@ -75,6 +167,9 @@ export function spawnPlant(
 }
 
 export function createWater(engine: TEngine, world: TWorld) {
+  // Add the water color system
+  world.addSystem(new WaterColorSystem(world));
+
   const waterMesh = createPlaneMesh(config.waterWidth, config.waterDepth);
 
   // Replace water material with water color
@@ -100,6 +195,7 @@ export function createWater(engine: TEngine, world: TWorld) {
     new TMeshComponent({ source: "inline", geometry: waterMesh.geometry }),
     new TMaterialComponent(waterMesh.material),
     new TVisibilityComponent(),
+    new WaterComponent(),
   ]);
 
   // Add seabed at the bottom (moved up slightly to be visible)
