@@ -17,11 +17,13 @@ import {
   TTextureComponent,
   TOriginPoint,
   TTexture,
+  TAnimatedSpriteComponent,
 } from "@tedengine/ted";
 import { vec3, quat } from "gl-matrix";
 import config from "./config";
 import waterTexture from "../assets/water2.png";
 import seabedTexture from "../assets/seabed.png";
+import plantTexture from "../assets/plant.png";
 
 export const resources: TResourcePackConfig = {
   textures: [
@@ -37,8 +39,40 @@ export const resources: TResourcePackConfig = {
         filter: TTextureFilter.Nearest,
       },
     },
+    {
+      url: plantTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
   ],
 };
+
+export function spawnPlant(
+  engine: TEngine,
+  world: TWorld,
+  x: number,
+  yOffset: number
+) {
+  const seabedY =
+    config.topLeftCorner.y - config.waterLevel - config.waterDepth;
+
+  world.createEntity([
+    TTransformBundle.with(
+      new TTransformComponent(
+        new TTransform(vec3.fromValues(x, seabedY + yOffset, -90))
+      )
+    ),
+    new TSpriteComponent({
+      width: 64,
+      height: 256, // Adjust based on your texture's aspect ratio
+      origin: TOriginPoint.BottomCenter,
+    }),
+    new TAnimatedSpriteComponent(7, 16),
+    new TTextureComponent(engine.resources.get<TTexture>(plantTexture)!),
+    new TVisibilityComponent(),
+  ]);
+}
 
 export function createWater(engine: TEngine, world: TWorld) {
   const waterMesh = createPlaneMesh(config.waterWidth, config.waterDepth);
@@ -88,6 +122,11 @@ export function createWater(engine: TEngine, world: TWorld) {
       new TVisibilityComponent(),
     ]);
   }
+
+  // Plants
+  spawnPlant(engine, world, 200, 20);
+  spawnPlant(engine, world, 300, -30);
+  spawnPlant(engine, world, 0, -10);
 
   // Add boundary box colliders to stop magnet going out of bounds
   // Top
