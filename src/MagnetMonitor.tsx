@@ -13,8 +13,7 @@ const Bubble = styled.div`
   color: white;
   font-size: 1.2rem;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-  transition: opacity 0.2s ease-in-out, left 0.1s ease-in-out,
-    top 0.1s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
   opacity: 0;
   &.visible {
     opacity: 1;
