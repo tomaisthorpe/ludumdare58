@@ -56,7 +56,7 @@ const config = {
         start: 750,
         end: 900,
       },
-      density: 0.5,
+      density: 0.7,
     },
   ] as LootConfig[],
 
