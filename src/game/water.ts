@@ -23,6 +23,7 @@ import {
   TEntityQuery,
   TSpriteLayer,
   TTextureWrap,
+  TSound,
 } from "@tedengine/ted";
 import { vec3, quat, vec2, vec4 } from "gl-matrix";
 import config from "./config";
@@ -31,6 +32,7 @@ import seabedTexture from "../assets/seabed.png";
 import plantTexture from "../assets/plant.png";
 import backgroundTexture from "../assets/background.png";
 import sprayTexture from "../assets/spray.png";
+import wavesAudio from "../assets/wave.wav";
 
 import { MagnetComponent } from "./magnet";
 
@@ -69,6 +71,7 @@ export const resources: TResourcePackConfig = {
       },
     },
   ],
+  sounds: [wavesAudio],
 };
 
 // Component to tag the water entity
@@ -94,14 +97,19 @@ export class WaterColorSystem extends TSystem {
     number,
     number
   ];
+  private wavesAudio: TSound;
 
-  constructor(world: TWorld) {
+  constructor(world: TWorld, engine: TEngine) {
     super();
     this.waterQuery = world.createQuery([WaterComponent, TMaterialComponent]);
     this.magnetQuery = world.createQuery([
       MagnetComponent,
       TTransformComponent,
     ]);
+
+    this.wavesAudio = engine.resources.get<TSound>(wavesAudio)!;
+    this.wavesAudio.loop = true;
+    this.wavesAudio.play();
   }
 
   public async update(_: TEngine, world: TWorld): Promise<void> {
@@ -124,11 +132,23 @@ export class WaterColorSystem extends TSystem {
     const magnetY = magnetTransform.transform.translation[1];
     const depth = waterSurfaceY - magnetY;
 
+    // Adjust wave sound volume based on depth
+    const maxDepth = config.waterDepth;
+    if (depth < 0) {
+      // Above water surface - full volume
+      this.wavesAudio.setVolume(0.5);
+    } else {
+      // Below water surface - fade out quickly at first, then more gradually
+      const normalizedDepth = Math.min(1, depth / maxDepth);
+      // Use cubic falloff for faster fade at the start
+      const volumeFactor = Math.pow(1 - normalizedDepth, 3);
+      this.wavesAudio.setVolume(volumeFactor * 0.5);
+    }
+
     // Determine color based on depth relative to total water depth
     let color: [number, number, number, number];
 
     const startDarkeningDepth = 200; // Start darkening at this depth
-    const maxDepth = config.waterDepth; // Full dark at the bottom
 
     if (depth < startDarkeningDepth) {
       // Shallow water: use top color
@@ -187,7 +207,7 @@ export function spawnPlant(
 
 export function createWater(engine: TEngine, world: TWorld) {
   // Add the water color system
-  world.addSystem(new WaterColorSystem(world));
+  world.addSystem(new WaterColorSystem(world, engine));
 
   const backgroundTexture2 = engine.resources.get<TTexture>(backgroundTexture);
   if (backgroundTexture2) {

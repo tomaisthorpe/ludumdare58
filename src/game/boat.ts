@@ -13,12 +13,17 @@ import {
   TTransformComponent,
   TVisibilityComponent,
   TWorld,
+  TComponent,
+  TSystem,
+  TEntityQuery,
+  TRigidBodyComponent,
 } from "@tedengine/ted";
-import { vec3 } from "gl-matrix";
+import { vec3, quat } from "gl-matrix";
 import config from "./config";
 import boatTexture from "../assets/boat.png";
 import pulleyTexture from "../assets/pulley.png";
 import winchTexture from "../assets/wheel.png";
+import { MagnetComponent } from "./magnet";
 
 export const resources: TResourcePackConfig = {
   textures: [
@@ -49,8 +54,63 @@ export const resources: TResourcePackConfig = {
   ],
 };
 
+export class WheelComponent extends TComponent {}
+
+export class WheelSystem extends TSystem {
+  private wheelQuery: TEntityQuery;
+  private magnetQuery: TEntityQuery;
+
+  constructor(world: TWorld) {
+    super();
+    this.wheelQuery = world.createQuery([WheelComponent, TTransformComponent]);
+    this.magnetQuery = world.createQuery([
+      MagnetComponent,
+      TRigidBodyComponent,
+    ]);
+  }
+
+  public async update(_: TEngine, world: TWorld, delta: number): Promise<void> {
+    const wheelEntities = this.wheelQuery.execute();
+    const magnetEntities = this.magnetQuery.execute();
+
+    if (wheelEntities.length === 0 || magnetEntities.length === 0) return;
+
+    const wheelEntity = wheelEntities[0];
+    const magnetEntity = magnetEntities[0];
+
+    const wheelTransform = world.getComponent(wheelEntity, TTransformComponent);
+    const magnetRigidBody = world.getComponent(
+      magnetEntity,
+      TRigidBodyComponent
+    );
+
+    if (!wheelTransform || !magnetRigidBody) return;
+
+    const yVelocity = magnetRigidBody.physicsOptions.linearVelocity?.[1] || 0;
+
+    const velocityThreshold = 10;
+    if (Math.abs(yVelocity) < velocityThreshold) return;
+
+    // Rotate the wheel based on velocity
+    // Negative Y velocity (moving down) = clockwise rotation
+    // Positive Y velocity (moving up) = counterclockwise rotation (reversed)
+    const rotationSpeed = yVelocity * 0.05; // Scale factor to make rotation look good
+    const rotationDelta = rotationSpeed * delta;
+
+    const rotationQuat = quat.create();
+    quat.rotateZ(
+      rotationQuat,
+      wheelTransform.transform.rotation,
+      rotationDelta
+    );
+    wheelTransform.transform.rotation = rotationQuat;
+  }
+}
+
 export function createBoat(engine: TEngine, world: TWorld) {
   const y = config.topLeftCorner.y - config.waterLevel + 10;
+
+  world.addSystem(new WheelSystem(world));
 
   world.createEntity([
     TTransformBundle.with(
@@ -98,5 +158,6 @@ export function createBoat(engine: TEngine, world: TWorld) {
     }),
     new TTextureComponent(engine.resources.get<TTexture>(winchTexture)!),
     new TVisibilityComponent(),
+    new WheelComponent(),
   ]);
 }

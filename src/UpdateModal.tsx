@@ -36,11 +36,27 @@ const Modal = styled.div`
     margin: 0;
     padding: 0;
   }
+
+  button {
+    font-size: 1rem;
+    margin-top: 0.25rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    border: 1px solid white;
+    background: none;
+    color: white;
+
+    &:hover {
+      background: white;
+      color: black;
+    }
+  }
 `;
 
 const Upgrades = styled.ul`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 `;
 
@@ -49,26 +65,37 @@ const Upgrade = styled.li`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #999;
+  border: 1px solid #555;
   padding: 1rem;
   border-radius: 0.5rem;
-  margin: 1rem;
+  margin: 0.5rem;
   width: 200px;
+  background: rgba(0, 0, 0, 0.5);
 
   h3 {
     font-size: 1.25rem;
     margin: 0;
     padding: 0;
   }
+  p {
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 0;
+    color: #aaa;
+
+    &.cost {
+      color: #fff;
+    }
+  }
 
   button {
     background: none;
     color: white;
     border: 1px solid white;
-    padding: 0.5rem 1rem;
+    padding: 0.2rem 0.5rem;
     border-radius: 0.5rem;
     cursor: pointer;
-    font-size: 1.25rem;
+    font-size: 0.75rem;
     margin-top: 1rem;
   }
 `;
@@ -131,15 +158,15 @@ export function UpdateModal() {
       <Modal>
         <h2>Upgrade</h2>
         <p>
-          You have reached the end of the day. Upgrade your boat to catch more
-          fish.
+          You have reached the end of the day.
+          <br /> Upgrade your boat to catch more treasure.
         </p>
         <Upgrades>
           {potentialUpgrades.map((upgrade) => (
             <Upgrade key={upgrade.name}>
               <h3>{upgrade.name}</h3>
               <p>{upgrade.description}</p>
-              <p>${upgrade.cost}</p>
+              <p className="cost">${upgrade.cost}</p>
               <p>
                 Level {upgrade.currentLevel}/{upgrade.maxLevel}
               </p>

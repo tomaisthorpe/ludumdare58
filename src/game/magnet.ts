@@ -125,7 +125,7 @@ export class MagnetSystem extends TSystem {
       if (!transform) continue;
 
       if (magnet.shouldReset) {
-        transform.transform.translation[0] = config.topLeftCorner.x + 300;
+        transform.transform.translation[0] = config.topLeftCorner.x + 331;
         transform.transform.translation[1] = startY;
         world.updateTransform(entity, transform.transform);
         magnet.shouldReset = false;
