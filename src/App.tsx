@@ -7,6 +7,7 @@ import MagnetMonitor from "./MagnetMonitor";
 import { UpdateModal } from "./UpdateModal";
 import { StartNextDay } from "./StartNextDay";
 import { Victory } from "./Victory";
+import { Instructions } from "./Instructions";
 
 function App() {
   return (
@@ -19,13 +20,14 @@ function App() {
             renderHeight: 600,
             imageRendering: "pixelated",
             showFullscreenToggle: true,
-            showAudioToggle: false,
+            showAudioToggle: true,
           }}
           game={new game()}
         >
           <Stats />
           <MagnetMonitor />
           <UpdateModal />
+          <Instructions />
           <StartNextDay />
           <Victory />
         </TGame>

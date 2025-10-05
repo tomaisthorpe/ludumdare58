@@ -32,6 +32,7 @@ export default class GameState extends TGameState {
 
   public day = 1;
   public money = 100;
+  public instructionsRead = false;
 
   public timeLeft = config.dayLength;
   public state: "start" | "fishing" | "upgrade" | "win" = "start";
@@ -150,7 +151,7 @@ export default class GameState extends TGameState {
 
   private onSpace() {
     if (this.state === "start") {
-      console.log("dropping magnet");
+      this.instructionsRead = true;
       this.dropMagnet();
       this.state = "fishing";
     }
@@ -164,6 +165,7 @@ export default class GameState extends TGameState {
       magnetValue: this.lootSystem.currentValue,
       state: this.state,
       equipment: this.equipment,
+      instructionsRead: this.instructionsRead,
     });
   }
 
