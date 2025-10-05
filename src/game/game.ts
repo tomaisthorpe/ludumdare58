@@ -22,6 +22,7 @@ import {
   resources as lootResources,
 } from "./loot.ts";
 import { RopeLinksSystem, createRopeLinks } from "./rope";
+import { createEelSystem, resources as eelResources } from "./eel";
 import { vec3, vec4, mat4 } from "gl-matrix";
 import config from "./config";
 import { Upgrade } from "../UpdateModal.tsx";
@@ -52,7 +53,8 @@ export default class GameState extends TGameState {
       lootResources,
       waterResources,
       magnetResources,
-      boatResources
+      boatResources,
+      eelResources
     );
     await rp.load();
 
@@ -103,6 +105,9 @@ export default class GameState extends TGameState {
     );
 
     this.lootSystem.spawnLoot();
+
+    // Initialize eel system
+    createEelSystem(this.engine, this.world);
 
     this.refreshGameContext();
     this.onSpace = this.onSpace.bind(this);

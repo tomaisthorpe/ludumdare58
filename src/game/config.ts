@@ -80,6 +80,16 @@ const config = {
     low: 10,
     treasure: Infinity,
   },
+
+  eel: {
+    spawnInterval: 0.01,
+    minDepth: 100,
+    speed: 90,
+    width: 64,
+    height: 16,
+    frameCount: 16,
+    fps: 10,
+  },
 };
 
 export default config;
