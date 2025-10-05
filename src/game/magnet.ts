@@ -57,7 +57,7 @@ export function createMagnet(engine: TEngine, world: TWorld) {
   world.addComponents(magnet, [
     TTransformBundle.with(
       new TTransformComponent(
-        new TTransform(vec3.fromValues(config.topLeftCorner.x + 331, startY, 0))
+        new TTransform(vec3.fromValues(config.topLeftCorner.x + 321, startY, 0))
       )
     ),
     new TSpriteComponent({
@@ -125,7 +125,7 @@ export class MagnetSystem extends TSystem {
       if (!transform) continue;
 
       if (magnet.shouldReset) {
-        transform.transform.translation[0] = config.topLeftCorner.x + 331;
+        transform.transform.translation[0] = config.topLeftCorner.x + 321;
         transform.transform.translation[1] = startY;
         world.updateTransform(entity, transform.transform);
         magnet.shouldReset = false;

@@ -56,6 +56,35 @@ export const resources: TResourcePackConfig = {
 
 export class WheelComponent extends TComponent {}
 
+export class BoatComponent extends TComponent {}
+
+export class BoatRockingSystem extends TSystem {
+  private boatQuery: TEntityQuery;
+  private time: number = 0;
+
+  constructor(world: TWorld) {
+    super();
+    this.boatQuery = world.createQuery([BoatComponent, TTransformComponent]);
+  }
+
+  public async update(_: TEngine, world: TWorld, delta: number): Promise<void> {
+    this.time += delta;
+    const boatEntities = this.boatQuery.execute();
+
+    // Gentle rocking motion
+    const rockingAngle = Math.sin(this.time * 0.8) * 0.03; // ~1.7 degrees max
+
+    for (const entity of boatEntities) {
+      const transform = world.getComponent(entity, TTransformComponent);
+      if (!transform) continue;
+
+      const rotationQuat = quat.create();
+      quat.rotateZ(rotationQuat, rotationQuat, rockingAngle);
+      transform.transform.rotation = rotationQuat;
+    }
+  }
+}
+
 export class WheelSystem extends TSystem {
   private wheelQuery: TEntityQuery;
   private magnetQuery: TEntityQuery;
@@ -110,12 +139,13 @@ export class WheelSystem extends TSystem {
 export function createBoat(engine: TEngine, world: TWorld) {
   const y = config.topLeftCorner.y - config.waterLevel + 10;
 
+  world.addSystem(new BoatRockingSystem(world));
   world.addSystem(new WheelSystem(world));
 
   world.createEntity([
     TTransformBundle.with(
       new TTransformComponent(
-        new TTransform(vec3.fromValues(-400 + 180, y + 75, -65))
+        new TTransform(vec3.fromValues(-400 + 170, y + 75, -65))
       )
     ),
     new TSpriteComponent({
@@ -126,12 +156,13 @@ export function createBoat(engine: TEngine, world: TWorld) {
     }),
     new TTextureComponent(engine.resources.get<TTexture>(boatTexture)!),
     new TVisibilityComponent(),
+    new BoatComponent(),
   ]);
 
   world.createEntity([
     TTransformBundle.with(
       new TTransformComponent(
-        new TTransform(vec3.fromValues(-400 + 180, y + 75, -80))
+        new TTransform(vec3.fromValues(-400 + 170, y + 75, -80))
       )
     ),
     new TSpriteComponent({
@@ -142,12 +173,13 @@ export function createBoat(engine: TEngine, world: TWorld) {
     }),
     new TTextureComponent(engine.resources.get<TTexture>(pulleyTexture)!),
     new TVisibilityComponent(),
+    new BoatComponent(),
   ]);
 
   world.createEntity([
     TTransformBundle.with(
       new TTransformComponent(
-        new TTransform(vec3.fromValues(-214, y + 67, -70))
+        new TTransform(vec3.fromValues(-224, y + 67, -70))
       )
     ),
     new TSpriteComponent({
