@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tedengine/ted": "^0.15.2",
+    "@tedengine/ted": "^0.15.3",
     "gl-matrix": "^3.4.3",
     "noise-ts": "^1.0.1",
     "react": "^18.2.0",
