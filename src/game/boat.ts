@@ -6,6 +6,7 @@ import {
   TOriginPoint,
   TResourcePackConfig,
   TSpriteComponent,
+  TSpriteLayer,
   TTexture,
   TTextureComponent,
   TTextureFilter,
@@ -37,13 +38,14 @@ export function createBoat(engine: TEngine, world: TWorld) {
   world.createEntity([
     TTransformBundle.with(
       new TTransformComponent(
-        new TTransform(vec3.fromValues(-400 + 180, y + 75, -10))
+        new TTransform(vec3.fromValues(-400 + 180, y + 75, -60))
       )
     ),
     new TSpriteComponent({
       width: 360,
       height: 300,
       origin: TOriginPoint.Center,
+      layer: TSpriteLayer.Foreground_0,
     }),
     new TTextureComponent(engine.resources.get<TTexture>(boatTexture)!),
     new TVisibilityComponent(),

@@ -23,12 +23,13 @@ import {
   TEntityQuery,
   TSpriteLayer,
 } from "@tedengine/ted";
-import { vec3, quat } from "gl-matrix";
+import { vec3, quat, vec2, vec4 } from "gl-matrix";
 import config from "./config";
 import waterTexture from "../assets/water2.png";
 import seabedTexture from "../assets/seabed.png";
 import plantTexture from "../assets/plant.png";
 import backgroundTexture from "../assets/background.png";
+import sprayTexture from "../assets/spray.png";
 
 import { MagnetComponent } from "./magnet";
 
@@ -54,6 +55,12 @@ export const resources: TResourcePackConfig = {
     },
     {
       url: backgroundTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+    {
+      url: sprayTexture,
       config: {
         filter: TTextureFilter.Nearest,
       },
@@ -195,6 +202,30 @@ export function createWater(engine: TEngine, world: TWorld) {
       new TVisibilityComponent(),
     ]);
   }
+
+  const sprayTexture2 = engine.resources.get<TTexture>(sprayTexture);
+  if (sprayTexture2) {
+    world.createEntity([
+      TTransformBundle.with(
+        new TTransformComponent(
+          new TTransform(
+            vec3.fromValues(0, config.topLeftCorner.y - config.waterLevel, -50)
+          )
+        )
+      ),
+      new TTextureComponent(sprayTexture2),
+      new TSpriteComponent({
+        width: 800,
+        height: 16,
+        origin: TOriginPoint.TopCenter,
+        layer: TSpriteLayer.Foreground_1,
+        instanceUVScales: vec2.fromValues(800 / 64, 1),
+        colorFilter: vec4.fromValues(1, 1, 1, 0.3),
+      }),
+      new TVisibilityComponent(),
+    ]);
+  }
+
   const waterMesh = createPlaneMesh(config.waterWidth, config.waterDepth);
 
   // Replace water material with water color
