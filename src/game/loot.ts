@@ -18,6 +18,7 @@ import {
   TTextureComponent,
   TTextureFilter,
   TTextureWrap,
+  TSound,
 } from "@tedengine/ted";
 import { vec3, quat } from "gl-matrix";
 import { PlayerMovementComponent } from "./player-movement";
@@ -27,6 +28,8 @@ import treasureTexture from "../assets/chest.png";
 import canTexture from "../assets/can.png";
 import gobletTexture from "../assets/goblet.png";
 import daggerTexture from "../assets/dagger.png";
+import pickUpAudio from "../assets/ping.wav";
+import collectAudio from "../assets/collect.wav";
 
 export const resources: TResourcePackConfig = {
   textures: [
@@ -63,6 +66,7 @@ export const resources: TResourcePackConfig = {
       },
     },
   ],
+  sounds: [pickUpAudio, collectAudio],
 };
 
 export function createLoot(
@@ -172,6 +176,11 @@ export class LootSystem extends TSystem {
 
   public currentValue: number = 0;
 
+  private pickUpAudio: TSound;
+  private collectAudio: TSound;
+  private collectSoundQueue: number = 0;
+  private lastCollectTime: number = 0;
+
   constructor(
     private engine: TEngine,
     private world: TWorld,
@@ -180,6 +189,12 @@ export class LootSystem extends TSystem {
     super();
     this.query = this.world.createQuery([LootComponent]);
     this.playerQuery = this.world.createQuery([PlayerMovementComponent]);
+
+    this.pickUpAudio = this.engine.resources.get<TSound>(pickUpAudio)!;
+    this.pickUpAudio.loop = false;
+
+    this.collectAudio = this.engine.resources.get<TSound>(collectAudio)!;
+    this.collectAudio.loop = false;
   }
 
   public spawnLoot() {
@@ -228,6 +243,14 @@ export class LootSystem extends TSystem {
   }
 
   public async update(_: TEngine, world: TWorld) {
+    // Process collect sound queue with delays
+    const now = performance.now();
+    if (this.collectSoundQueue > 0 && now - this.lastCollectTime >= 100) {
+      this.collectAudio.play();
+      this.collectSoundQueue--;
+      this.lastCollectTime = now;
+    }
+
     const entities = this.query.execute();
     const players = this.playerQuery.execute();
 
@@ -275,8 +298,15 @@ export class LootSystem extends TSystem {
         vec3.normalize(force, force);
         vec3.scale(force, force, 20);
         totalForce = vec3.add(totalForce, totalForce, force);
+
+        if (!loot.magnetised) {
+          this.pickUpAudio.play();
+        }
         loot.magnetised = true;
       } else if (distance <= 20) {
+        if (!loot.magnetised) {
+          this.pickUpAudio.play();
+        }
         loot.magnetised = true;
       } else {
         loot.magnetised = false;
@@ -293,6 +323,7 @@ export class LootSystem extends TSystem {
           config.topLeftCorner.y - config.waterLevel - 50
       ) {
         this.onCollect(loot.type, loot.value);
+        this.collectSoundQueue++;
         world.removeEntity(entity);
       } else {
         world.applyCentralForce(entity, totalForce);
