@@ -23,6 +23,7 @@ import {
 } from "@tedengine/ted";
 import { vec3, quat } from "gl-matrix";
 import { PlayerMovementComponent } from "./player-movement";
+import { MagnetComponent } from "./magnet";
 import config, { LootType as ConfigLootType } from "./config";
 import coinTexture from "../assets/coin.png";
 import treasureTexture from "../assets/chest.png";
@@ -275,6 +276,8 @@ export class LootSystem extends TSystem {
         ?.get(TTransformComponent);
       if (!playerTransform) continue;
 
+      const magnetComponent = world.getComponents(player)?.get(MagnetComponent);
+
       const rb = world.getComponents(entity)?.get(TRigidBodyComponent);
       if (!rb) continue;
       const mass = rb.physicsOptions.mass || 1;
@@ -285,32 +288,40 @@ export class LootSystem extends TSystem {
       );
       let totalForce = antiGravity;
 
-      // Calculate distance between loot and player
-      const distance = vec3.distance(
-        lootTransform.transform.translation,
-        playerTransform.transform.translation
-      );
-      if (distance < 100 && distance > 20) {
-        // Loot should be 'magnetised' to the player
-        const force = vec3.subtract(
-          vec3.create(),
-          playerTransform.transform.translation,
-          lootTransform.transform.translation
-        );
-        vec3.normalize(force, force);
-        vec3.scale(force, force, 20);
-        totalForce = vec3.add(totalForce, totalForce, force);
+      // Only apply magnetic attraction if magnet is not electrocuted
+      const magnetActive = !magnetComponent || !magnetComponent.electrocuted;
 
-        if (!loot.magnetised) {
-          this.pickUpAudio.play();
+      if (magnetActive) {
+        // Calculate distance between loot and player
+        const distance = vec3.distance(
+          lootTransform.transform.translation,
+          playerTransform.transform.translation
+        );
+        if (distance < 100 && distance > 20) {
+          // Loot should be 'magnetised' to the player
+          const force = vec3.subtract(
+            vec3.create(),
+            playerTransform.transform.translation,
+            lootTransform.transform.translation
+          );
+          vec3.normalize(force, force);
+          vec3.scale(force, force, 20);
+          totalForce = vec3.add(totalForce, totalForce, force);
+
+          if (!loot.magnetised) {
+            this.pickUpAudio.play();
+          }
+          loot.magnetised = true;
+        } else if (distance <= 20) {
+          if (!loot.magnetised) {
+            this.pickUpAudio.play();
+          }
+          loot.magnetised = true;
+        } else {
+          loot.magnetised = false;
         }
-        loot.magnetised = true;
-      } else if (distance <= 20) {
-        if (!loot.magnetised) {
-          this.pickUpAudio.play();
-        }
-        loot.magnetised = true;
       } else {
+        // Magnet is electrocuted, release all loot
         loot.magnetised = false;
       }
 

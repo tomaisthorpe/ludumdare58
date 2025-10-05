@@ -61,7 +61,7 @@ const config = {
   ] as LootConfig[],
 
   equipment: {
-    winchSpeeds: [75, 125, 200],
+    winchSpeeds: [55, 115, 200],
     winchCosts: [30, 60, 0],
     ropeLengths: [450, 650, 825, 1200],
     ropeCosts: [20, 80, 140, 200, 0],
@@ -82,13 +82,18 @@ const config = {
   },
 
   eel: {
-    spawnInterval: 0.01,
-    minDepth: 100,
+    spawnInterval: 3,
+    minDepth: 400, // Minimum depth below water surface to spawn
+    maxDepth: 800, // Maximum depth below water surface to spawn (avoids bottom 200 units)
     speed: 90,
     width: 64,
     height: 16,
     frameCount: 16,
     fps: 10,
+    collisionRadius: 30, // Distance at which eel collides with magnet
+    electrocutionDuration: 3, // Seconds the magnet is disabled for
+    pulseInterval: 2, // Seconds between pulses
+    pulseDuration: 0.3, // Duration of each pulse in seconds
   },
 };
 

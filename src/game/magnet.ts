@@ -20,7 +20,7 @@ import {
   TSpriteComponent,
   TSpriteLayer,
 } from "@tedengine/ted";
-import { vec3 } from "gl-matrix";
+import { vec3, vec4 } from "gl-matrix";
 import config from "./config";
 import { PlayerMovementComponent } from "./player-movement";
 import magnetTexture from "../assets/magnet.png";
@@ -100,6 +100,8 @@ export class MagnetComponent extends TComponent {
   public ropeLength = 0;
   public playerRopeLength = config.equipment.ropeLengths[0];
   public shouldReset = false;
+  public electrocuted = false;
+  public electrocutionTimer = 0;
 
   constructor() {
     super();
@@ -114,7 +116,11 @@ export class MagnetSystem extends TSystem {
     this.query = world.createQuery([MagnetComponent]);
   }
 
-  public async update(_: TEngine, world: TWorld): Promise<void> {
+  public async update(
+    _engine: TEngine,
+    world: TWorld,
+    delta: number
+  ): Promise<void> {
     const entities = this.query.execute();
 
     for (const entity of entities) {
@@ -124,12 +130,48 @@ export class MagnetSystem extends TSystem {
       const transform = world.getComponent(entity, TTransformComponent);
       if (!transform) continue;
 
+      const sprite = world.getComponent(entity, TSpriteComponent);
+
+      // Handle electrocution timer and visual effect
+      if (magnet.electrocuted) {
+        magnet.electrocutionTimer -= delta;
+
+        // Flash yellow/white effect
+        if (sprite) {
+          const flashIntensity =
+            Math.sin(magnet.electrocutionTimer * 15) * 0.5 + 0.5;
+          sprite.colorFilter = vec4.fromValues(
+            1 + flashIntensity,
+            1 + flashIntensity,
+            0.5,
+            1
+          );
+        }
+
+        if (magnet.electrocutionTimer <= 0) {
+          magnet.electrocuted = false;
+          magnet.electrocutionTimer = 0;
+
+          // Clear color filter
+          if (sprite) {
+            sprite.colorFilter = vec4.fromValues(1, 1, 1, 1);
+          }
+        }
+      }
+
       if (magnet.shouldReset) {
         transform.transform.translation[0] = config.topLeftCorner.x + 321;
         transform.transform.translation[1] = startY;
         world.updateTransform(entity, transform.transform);
         magnet.shouldReset = false;
         magnet.ropeLength = 0;
+        magnet.electrocuted = false;
+        magnet.electrocutionTimer = 0;
+
+        // Clear color filter on reset
+        if (sprite) {
+          sprite.colorFilter = vec4.fromValues(1, 1, 1, 1);
+        }
 
         world.updateBodyOptions(entity, {
           linearVelocity: vec3.fromValues(0, 0, 0),

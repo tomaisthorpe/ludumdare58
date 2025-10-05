@@ -10,6 +10,7 @@ import {
 import { vec3 } from "gl-matrix";
 import GameState from "./game";
 import config from "./config";
+import { MagnetComponent } from "./magnet";
 
 export class PlayerMovementComponent extends TComponent {}
 
@@ -33,12 +34,17 @@ export class PlayerMovementSystem extends TSystem {
     for (const entity of entities) {
       const input = world.getComponent(entity, TPlayerInputComponent);
       const transform = world.getComponent(entity, TTransformComponent);
+      const magnet = world.getComponent(entity, MagnetComponent);
 
       if (!input || !transform) continue;
 
       const force = vec3.fromValues(0, 0, 0);
 
-      if (this.gameState.state === "fishing") {
+      // Don't allow movement if magnet is electrocuted
+      if (
+        this.gameState.state === "fishing" &&
+        (!magnet || !magnet.electrocuted)
+      ) {
         force[0] += input.moveDirection[0] * this.winchSpeed;
         force[1] += input.moveDirection[1] * this.winchSpeed;
       }

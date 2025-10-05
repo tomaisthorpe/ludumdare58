@@ -1,5 +1,4 @@
 import {
-  TRigidBodyComponent,
   TTransform,
   TTransformBundle,
   TTransformComponent,
@@ -18,9 +17,10 @@ import {
   TAnimatedSpriteComponent,
   TSpriteLayer,
 } from "@tedengine/ted";
-import { vec3, quat, vec2 } from "gl-matrix";
+import { vec3, vec4 } from "gl-matrix";
 import config from "./config";
 import eelTexture from "../assets/eel.png";
+import { MagnetComponent } from "./magnet";
 
 export const resources: TResourcePackConfig = {
   textures: [
@@ -34,26 +34,49 @@ export const resources: TResourcePackConfig = {
 };
 
 export class EelComponent extends TComponent {
+  public pulseTimer: number = 0;
+  public isPulsing: boolean = false;
+  public pulseDuration: number = 0;
+
   constructor(public speed: number) {
     super();
+    // Randomize initial pulse timer so eels don't all pulse at once
+    this.pulseTimer = Math.random() * config.eel.pulseInterval;
   }
 }
 
 export class EelSystem extends TSystem {
   private query: TEntityQuery;
+  private magnetQuery: TEntityQuery;
   private spawnTimer: number = 0;
 
   constructor(private engine: TEngine, private world: TWorld) {
     super();
     this.query = this.world.createQuery([EelComponent, TTransformComponent]);
+    this.magnetQuery = this.world.createQuery([
+      MagnetComponent,
+      TTransformComponent,
+    ]);
   }
 
-  public async update(engine: TEngine, world: TWorld, delta: number) {
+  public async update(_engine: TEngine, world: TWorld, delta: number) {
     // Update spawn timer
     this.spawnTimer += delta;
     if (this.spawnTimer >= config.eel.spawnInterval) {
       this.spawnTimer = 0;
       this.spawnEel();
+    }
+
+    // Get magnet position
+    const magnetEntities = this.magnetQuery.execute();
+    let magnetTransform: TTransformComponent | undefined;
+    let magnetComponent: MagnetComponent | undefined;
+    let magnetEntity: number | undefined;
+
+    if (magnetEntities.length > 0) {
+      magnetEntity = magnetEntities[0];
+      magnetTransform = world.getComponent(magnetEntity, TTransformComponent);
+      magnetComponent = world.getComponent(magnetEntity, MagnetComponent);
     }
 
     // Update existing eels
@@ -63,6 +86,57 @@ export class EelSystem extends TSystem {
       const transform = world.getComponents(entity)?.get(TTransformComponent);
 
       if (!eel || !transform) continue;
+
+      const sprite = world.getComponent(entity, TSpriteComponent);
+
+      eel.pulseTimer += delta;
+      if (eel.pulseTimer >= config.eel.pulseInterval) {
+        eel.pulseTimer = 0;
+        eel.isPulsing = true;
+        eel.pulseDuration = 0;
+      }
+
+      if (eel.isPulsing) {
+        eel.pulseDuration += delta;
+
+        if (sprite) {
+          const pulseCycle = eel.pulseDuration / config.eel.pulseDuration;
+          const pulseIntensity = Math.sin(pulseCycle * Math.PI) * 0.7;
+          sprite.colorFilter = vec4.fromValues(
+            1 + pulseIntensity,
+            1 + pulseIntensity * 0.8,
+            0.6,
+            1
+          );
+        }
+
+        if (eel.pulseDuration >= config.eel.pulseDuration) {
+          eel.isPulsing = false;
+          eel.pulseDuration = 0;
+
+          // Clear color filter
+          if (sprite) {
+            sprite.colorFilter = vec4.fromValues(1, 1, 1, 1);
+          }
+        }
+      }
+
+      // Check collision with magnet (only consider x and y)
+      if (magnetTransform && magnetComponent && !magnetComponent.electrocuted) {
+        const dx =
+          transform.transform.translation[0] -
+          magnetTransform.transform.translation[0];
+        const dy =
+          transform.transform.translation[1] -
+          magnetTransform.transform.translation[1];
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < config.eel.collisionRadius) {
+          magnetComponent.electrocuted = true;
+          magnetComponent.electrocutionTimer = config.eel.electrocutionDuration;
+          continue;
+        }
+      }
 
       // Move the eel horizontally (left to right)
       const movement = vec3.fromValues(eel.speed * delta, 0, 0);
@@ -89,8 +163,8 @@ export class EelSystem extends TSystem {
     // Spawn from left edge
     const x = config.topLeftCorner.x - 50;
 
-    // Random depth below the configured minimum depth
-    const depthRange = config.waterDepth - config.eel.minDepth;
+    // Random depth between minDepth and maxDepth
+    const depthRange = config.eel.maxDepth - config.eel.minDepth;
     const depthBelowWater = config.eel.minDepth + Math.random() * depthRange;
     const y = config.topLeftCorner.y - config.waterLevel - depthBelowWater;
 
