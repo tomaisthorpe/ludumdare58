@@ -1,8 +1,5 @@
 import {
-  createBoxMesh,
   createBoxCollider,
-  TMaterialComponent,
-  TMeshComponent,
   TRigidBodyComponent,
   TTransform,
   TTransformBundle,
@@ -24,7 +21,6 @@ import {
 import { vec3 } from "gl-matrix";
 import { PlayerMovementComponent } from "./player-movement";
 import config from "./config";
-import { overridePalette } from "./utils";
 import coinTexture from "../assets/coin.png";
 import treasureTexture from "../assets/chest.png";
 
