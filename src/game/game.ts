@@ -12,7 +12,7 @@ import {
 import { PlayerMovementSystem } from "./player-movement";
 import { createWater, resources as waterResources } from "./water";
 import { resources as magnetResources } from "./magnet";
-import { createBoat } from "./boat";
+import { createBoat, resources as boatResources } from "./boat";
 import { createCamera } from "./camera";
 import { createMagnet } from "./magnet";
 import {
@@ -50,7 +50,8 @@ export default class GameState extends TGameState {
       this.engine,
       lootResources,
       waterResources,
-      magnetResources
+      magnetResources,
+      boatResources
     );
     await rp.load();
 
@@ -86,7 +87,7 @@ export default class GameState extends TGameState {
 
     createRopeLinks(this.world);
     createWater(this.engine, this.world);
-    createBoat(this.world);
+    createBoat(this.engine, this.world);
     this.lootSystem = createLoot(
       this.engine,
       this.world,
