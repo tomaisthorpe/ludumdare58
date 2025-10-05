@@ -21,12 +21,15 @@ import {
   TComponent,
   TSystem,
   TEntityQuery,
+  TSpriteLayer,
 } from "@tedengine/ted";
 import { vec3, quat } from "gl-matrix";
 import config from "./config";
 import waterTexture from "../assets/water2.png";
 import seabedTexture from "../assets/seabed.png";
 import plantTexture from "../assets/plant.png";
+import backgroundTexture from "../assets/background.png";
+
 import { MagnetComponent } from "./magnet";
 
 export const resources: TResourcePackConfig = {
@@ -45,6 +48,12 @@ export const resources: TResourcePackConfig = {
     },
     {
       url: plantTexture,
+      config: {
+        filter: TTextureFilter.Nearest,
+      },
+    },
+    {
+      url: backgroundTexture,
       config: {
         filter: TTextureFilter.Nearest,
       },
@@ -170,6 +179,22 @@ export function createWater(engine: TEngine, world: TWorld) {
   // Add the water color system
   world.addSystem(new WaterColorSystem(world));
 
+  const backgroundTexture2 = engine.resources.get<TTexture>(backgroundTexture);
+  if (backgroundTexture2) {
+    world.createEntity([
+      TTransformBundle.with(
+        new TTransformComponent(new TTransform(vec3.fromValues(0, 0, -101)))
+      ),
+      new TSpriteComponent({
+        width: 800,
+        height: 600, // Adjust based on your texture's aspect ratio
+        origin: TOriginPoint.Center,
+        layer: TSpriteLayer.Background_0,
+      }),
+      new TTextureComponent(backgroundTexture2),
+      new TVisibilityComponent(),
+    ]);
+  }
   const waterMesh = createPlaneMesh(config.waterWidth, config.waterDepth);
 
   // Replace water material with water color
