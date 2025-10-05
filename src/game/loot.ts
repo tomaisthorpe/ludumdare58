@@ -118,13 +118,13 @@ export function spawnLoot(
       texture = engine.resources.get<TTexture>(gobletTexture);
       width = 16;
       height = 32;
-      collider = createBoxCollider(16, 16, 8);
+      collider = createBoxCollider(16, 32, 8);
       break;
     case "dagger":
       texture = engine.resources.get<TTexture>(daggerTexture);
       width = 24;
       height = 64;
-      collider = createBoxCollider(16, 16, 8);
+      collider = createBoxCollider(24, 64, 8);
       break;
   }
 
@@ -333,7 +333,7 @@ export class LootSystem extends TSystem {
       if (
         loot.magnetised &&
         lootTransform.transform.translation[1] >
-          config.topLeftCorner.y - config.waterLevel - 75
+        config.topLeftCorner.y - config.waterLevel - 75
       ) {
         this.onCollect(loot.type, loot.value);
         this.collectSoundQueue++;
